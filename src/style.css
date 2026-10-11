@@ -1,0 +1,408 @@
+/* ============================================================
+   One dark room. Smoke, a flame, a lot of type.
+   ============================================================ */
+
+:root{
+  --bg:#0a0807;
+  --ink:#ece3d3;          /* bone */
+  --ink-2:#a39a8d;        /* ash. 6:1 on --bg, safe for small text */
+  --ink-3:#6f675d;        /* decoration only */
+  --line:rgba(236,227,211,.14);
+  --amber:#e9a23b;
+  --amber-hi:#f7c36f;
+  --ember:#ff6a2b;
+  --paper:#e8dec9;
+  --paper-ink:#14100d;
+
+  --f-display:'League Gothic','Arial Narrow',Impact,sans-serif;
+  --f-serif:'Instrument Serif',Georgia,'Times New Roman',serif;
+  --f-mono:'DM Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+
+  --pad:clamp(20px,4.4vw,76px);
+  --bar-h:64px;
+  --ease:cubic-bezier(.2,.7,.2,1);
+
+  /* notch and home bar */
+  --sa-t:env(safe-area-inset-top,0px);
+  --sa-r:env(safe-area-inset-right,0px);
+  --sa-b:env(safe-area-inset-bottom,0px);
+  --sa-l:env(safe-area-inset-left,0px);
+  /* keep touches this far from the screen edge: the phone's own back-swipe starts there */
+  --edge:28px;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{background:var(--bg);color:var(--ink);color-scheme:dark;-webkit-text-size-adjust:100%;text-size-adjust:100%;scrollbar-width:thin;scrollbar-color:#3a342e transparent}
+body{margin:0;min-height:100svh;background:var(--bg);font-family:var(--f-serif);font-size:18px;line-height:1.35;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow-x:hidden}
+h1,h2,h3,p,ul,ol,dl,dd,figure{margin:0}
+ul,ol{padding:0;list-style:none}
+[hidden]{display:none!important}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;border-radius:0}
+::selection{background:var(--amber);color:#120c06}
+:focus-visible{outline:1px solid var(--amber-hi);outline-offset:4px}
+
+html.is-locked,html.is-locked body,html.is-frozen,html.is-frozen body{height:100%;overflow:hidden;overscroll-behavior:none}
+/* while the gate is up the page is pinned: it cannot scroll, bounce, or pull to refresh */
+html.is-locked body{position:fixed;inset:0;width:100%;touch-action:none}
+html.is-locked #main{visibility:hidden}
+html:not(.is-locked) .gate{display:none}
+
+.mono{font-family:var(--f-mono);font-size:11.5px;line-height:1.5;letter-spacing:.14em;text-transform:uppercase;font-weight:400}
+
+/* ---------- layers ---------- */
+#smoke{position:fixed;inset:0;width:100%;height:100%;display:block;z-index:0;background:var(--bg)}
+#main{position:relative;z-index:5}
+#sparks{position:fixed;inset:0;width:100%;height:100%;z-index:30;pointer-events:none;mix-blend-mode:screen}
+/* a full-screen blend costs a phone's GPU every frame. the sparks are drawn additively already, so plain compositing looks the same */
+@media (pointer:coarse){#sparks{mix-blend-mode:normal}}
+.vignette{position:fixed;inset:0;z-index:40;pointer-events:none;background:radial-gradient(120% 92% at 50% 46%,transparent 54%,rgba(0,0,0,.55) 100%)}
+.grain{
+  position:fixed;inset:-80px;z-index:41;pointer-events:none;opacity:.075;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 .95 0 0 0 0 .88 1.4 0 0 0 -.5'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:180px;
+  animation:grain 1.2s steps(1) infinite;
+}
+@keyframes grain{
+  0%{transform:translate(0,0)}
+  20%{transform:translate(-34px,20px)}
+  40%{transform:translate(26px,-30px)}
+  60%{transform:translate(-18px,-12px)}
+  80%{transform:translate(32px,26px)}
+}
+
+/* ---------- bar ---------- */
+.bar{position:fixed;top:0;left:0;right:0;z-index:35;height:calc(var(--bar-h) + var(--sa-t));padding:var(--sa-t) max(var(--pad),var(--sa-r)) 0 max(var(--pad),var(--sa-l));display:flex;align-items:center;justify-content:space-between;gap:8px;white-space:nowrap;pointer-events:none;color:var(--ink);mix-blend-mode:difference}
+.bar > *{pointer-events:auto}
+/* once content slides under the bar, a scrim keeps it from fighting the bar text */
+body::before{content:"";position:fixed;top:0;left:0;right:0;height:calc(var(--bar-h) + var(--sa-t) + 44px);z-index:34;pointer-events:none;opacity:0;transition:opacity .5s var(--ease);background:linear-gradient(rgba(10,8,7,.94) 0,rgba(10,8,7,.9) 50%,rgba(10,8,7,.5) 76%,rgba(10,8,7,0))}
+html.is-live.is-scrolled body::before{opacity:1}
+.bar__mark{display:grid;margin:0;min-width:0}
+.bar__markA,.bar__markB{grid-area:1/1;white-space:nowrap;transition:opacity .7s var(--ease),transform .7s var(--ease)}
+.bar__markB{opacity:0;transform:translateY(8px)}
+.bar__markB i{font-style:normal;opacity:.5;margin:0 .35em}
+html.is-live .bar__markA{opacity:0;transform:translateY(-8px)}
+html.is-live .bar__markB{opacity:1;transform:none}
+.bar__nav{display:flex;align-items:center;flex:none;gap:clamp(0px,2vw,24px);margin-right:-12px}
+/* every tap target in the bar is at least 48px, even though the words are small */
+.bar__link,.bar__sound{display:inline-flex;align-items:center;justify-content:center;min-width:48px;min-height:48px;padding:0 12px;white-space:nowrap}
+.bar__link{opacity:0;pointer-events:none;transition:opacity .7s var(--ease)}
+.bar__link span{border-bottom:1px solid transparent}
+html.is-live .bar__link{opacity:1;pointer-events:auto}
+.bar__sound{gap:10px;color:inherit;font:inherit;letter-spacing:inherit;text-transform:inherit;-webkit-tap-highlight-color:transparent}
+@media (hover:hover) and (pointer:fine){.bar__link:hover span{border-bottom-color:currentColor}}
+/* small screens: the sound button is just the icon. the words stay for screen readers */
+@media (max-width:520px){
+  .bar__soundTxt{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+}
+/* very small: the date stays, the rsvp link steps aside (it is also in the scenes) */
+@media (max-width:300px){.bar__link{display:none}}
+.eq{display:inline-flex;align-items:flex-end;gap:2px;height:12px}
+.eq i{display:block;width:2px;height:100%;background:currentColor;transform-origin:bottom;animation:eq 1s ease-in-out infinite}
+.eq i:nth-child(2){animation-delay:-.3s}
+.eq i:nth-child(3){animation-delay:-.62s}
+.eq i:nth-child(4){animation-delay:-.15s}
+@keyframes eq{0%,100%{transform:scaleY(.25)}50%{transform:scaleY(1)}}
+.bar__sound[aria-pressed="false"] .eq i{animation:none;transform:scaleY(.18)}
+
+/* ---------- gate ---------- */
+.gate{--d:min(96vw,86vh,820px);--hide:.6;position:fixed;inset:0;z-index:20;overflow:hidden;touch-action:none;overscroll-behavior:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+@supports (height:1svh){.gate{--d:min(96vw,86svh,820px)}}
+.gate__copy{position:absolute;left:0;right:0;top:27%;padding:0 var(--pad);text-align:center}
+.gate__dark{font-family:var(--f-serif);font-style:italic;font-size:clamp(32px,4.8vw,72px);line-height:1;color:var(--ink);opacity:.86}
+.gate__hint{margin-top:20px;color:var(--ink-2);font-size:13px}
+.wish{position:absolute;left:0;right:0;top:72%;padding:0 var(--pad);text-align:center;visibility:hidden}
+.wish__line{font-family:var(--f-serif);font-size:clamp(36px,5.4vw,82px);line-height:1;color:var(--ink)}
+.wish__hint{margin-top:18px;color:var(--ink);font-size:13px;text-shadow:0 1px 16px rgba(10,6,2,.55)}
+
+.wheelRig{--lit:0;position:absolute;left:calc(50% - var(--d) / 2);bottom:calc(var(--d) * var(--hide) * -1);width:var(--d);height:var(--d)}
+.wheel{position:absolute;inset:0;border-radius:50%;pointer-events:none;touch-action:none;will-change:transform}
+.wheel:focus-visible{outline:1px solid var(--amber-hi);outline-offset:-12px}
+/* the thing a finger actually touches: the visible cap of the wheel, pulled in from both screen edges */
+.wheelGrip{position:absolute;z-index:2;bottom:0;left:max(var(--edge),var(--sa-l));right:max(var(--edge),var(--sa-r));height:calc(var(--d) * (1 - var(--hide)) + 28px);touch-action:none;cursor:grab;-webkit-tap-highlight-color:transparent}
+.wheelGrip:active{cursor:grabbing}
+.gate.is-lit .wheelGrip{pointer-events:none}
+.wheel__svg{display:block;width:100%;height:100%;overflow:visible;pointer-events:none}
+.wheelLight{
+  position:absolute;inset:0;border-radius:50%;pointer-events:none;mix-blend-mode:screen;
+  background:
+    radial-gradient(60% 34% at 50% 1%,rgba(255,176,88,calc(var(--lit) * .55)),rgba(255,120,40,calc(var(--lit) * .12)) 55%,transparent 100%),
+    radial-gradient(50% 20% at 50% 0%,rgba(255,244,225,.07),transparent 100%);
+}
+/* skip lives at the top: bottom corners get covered by browser toolbars and the home bar */
+.skip{position:absolute;z-index:4;top:calc(var(--bar-h) + var(--sa-t) + 8px);right:max(var(--pad),var(--sa-r));display:inline-flex;align-items:center;justify-content:center;min-height:48px;min-width:48px;padding:0 20px;border:1px solid rgba(236,227,211,.42);border-radius:999px;background:rgba(10,8,7,.6);color:var(--ink);font-size:12.5px;letter-spacing:.16em;white-space:nowrap;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);-webkit-tap-highlight-color:transparent;transition:color .3s,border-color .3s,background .3s}
+@media (hover:hover) and (pointer:fine){.skip:hover{color:var(--amber-hi);border-color:var(--amber)}}
+.skip:active{background:rgba(233,162,59,.22);border-color:var(--amber)}
+
+
+/* ============================================================
+   AFTER THE INTRO: four scenes
+   one screen each, one joke, one tap. phone first.
+   ============================================================ */
+html{scroll-snap-type:y mandatory}
+#main{position:relative;z-index:5}
+
+.scene{
+  position:relative;display:flex;flex-direction:column;
+  min-height:100vh;min-height:100svh;
+  padding:calc(var(--bar-h) + var(--sa-t) + 10px) max(var(--pad),var(--sa-r)) calc(var(--sa-b) + 96px) max(var(--pad),var(--sa-l));
+  scroll-snap-align:start;scroll-snap-stop:always;
+}
+@supports (height:1dvh){.scene{min-height:100dvh}}
+.scene--rsvp{padding-bottom:calc(var(--sa-b) + 40px)}
+/* minmax(0,1fr): the column may never grow past the screen. with the default "auto" column a long countdown number (1800:00:00 hours)
+   widened every line in the scene, and a phone answers a too-wide page by zooming out */
+.scene__body{width:100%;max-width:520px;margin:auto;display:grid;grid-template-columns:minmax(0,1fr);gap:clamp(14px,2.6svh,26px)}
+/* the quiz and the countdown sit a little below the middle, where a thumb already is */
+@media (orientation:portrait){
+  .scene--quiz::before,.scene--count::before{content:"";flex:2 1 0}
+  .scene--quiz::after,.scene--count::after{content:"";flex:1 1 0}
+  .scene--quiz .scene__body,.scene--count .scene__body{margin:0 auto}
+}
+
+.eyebrow{display:flex;align-items:center;gap:14px;color:var(--ink-2);font-size:13px}
+.eyebrow::after{content:"";flex:1;height:1px;background:var(--line);transform-origin:left;transform:scaleX(var(--w,1))}
+
+/* the arrow at the bottom of a scene */
+.next{position:absolute;z-index:6;left:50%;bottom:calc(var(--sa-b) + 40px);width:56px;height:48px;margin-left:-28px;display:grid;place-items:center;color:var(--ink);opacity:0;pointer-events:none;-webkit-tap-highlight-color:transparent}
+.next svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.next.is-ready{opacity:.92;pointer-events:auto;animation:nudge 2.2s var(--ease) infinite}
+@keyframes nudge{0%,100%{transform:translateY(0)}50%{transform:translateY(7px)}}
+
+/* ---------- 1 · his name ---------- */
+.hero__title{display:grid;gap:clamp(6px,1.4svh,16px)}
+.hero__hb{font-family:var(--f-serif);font-style:italic;font-size:clamp(28px,8.4vw,56px);line-height:1;color:var(--ink)}
+.hero__nameBox{position:relative;display:block}
+.hero__name{display:block;font-family:var(--f-display);font-weight:400;text-transform:uppercase;line-height:.8;font-size:min(72vw,27svh);letter-spacing:.004em;color:var(--ink);margin-left:-.025em}
+.hero__name .w{display:block}
+.hero__name .ch{display:inline-block;will-change:transform,opacity}
+/* the name is a button: tap it and he coughs */
+.hero__cough{position:absolute;inset:-6px;width:calc(100% + 12px);height:calc(100% + 12px);background:none;border:0;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.hero__foot{display:grid;gap:8px;padding-top:14px;border-top:1px solid var(--line)}
+.hero__party{color:var(--ink-2);font-size:13px}
+.hero__joke{font-family:var(--f-serif);font-style:italic;font-size:clamp(22px,6.4vw,34px);line-height:1.08;color:var(--amber-hi)}
+.hero__age{font-family:var(--f-serif);font-size:clamp(19px,5.2vw,26px);line-height:1.1;color:var(--ink-2)}
+.hero__tap{color:var(--ink-2);font-size:13px;min-height:1.5em}
+
+/* ---------- 2 · who do you call ---------- */
+.quiz{--q-fs:clamp(26px,7.6vw,44px);display:grid;gap:clamp(16px,3svh,28px)}
+.quiz__stage{position:relative;display:grid;align-items:end;min-height:calc(var(--q-fs) * 3.5)}
+.quiz__q,.quiz__a{grid-area:1/1;margin:0;font-size:var(--q-fs);line-height:1.08;letter-spacing:-.012em}
+.quiz__q{color:var(--ink)}
+.quiz__a{display:grid;gap:8px;align-content:end;color:var(--amber-hi);font-style:italic;opacity:0;pointer-events:none}
+.quiz__ok{color:var(--ink);font-style:normal;font-size:13px}
+.quiz__opts{display:grid;gap:12px}
+.opt{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:58px;padding:0 20px;border:1px solid rgba(236,227,211,.4);background:rgba(10,8,7,.42);color:var(--ink);font-family:var(--f-display);font-size:30px;line-height:1;letter-spacing:.05em;text-transform:uppercase;text-align:left;-webkit-tap-highlight-color:transparent;transition:background .25s,border-color .25s,color .25s}
+.opt__a{font-family:var(--f-mono);font-size:16px;letter-spacing:0;opacity:.55}
+.opt:active{background:rgba(233,162,59,.2);border-color:var(--amber)}
+.opt.is-picked{background:var(--amber);border-color:var(--amber);color:#150d05}
+.opt.is-picked .opt__a{opacity:1}
+.opt.is-gone{pointer-events:none}
+.pips{display:flex;gap:8px}
+.pips li{width:22px;height:3px;background:var(--line);transition:background .4s}
+.pips li.is-on{background:var(--amber)}
+
+/* ---------- 3 · the countdown ---------- */
+.big{display:grid;gap:12px;justify-items:start;width:100%;min-height:48px;padding:6px 0;text-align:left;-webkit-tap-highlight-color:transparent}
+.big__n{display:flex;align-items:flex-end;font-family:var(--f-display);font-size:var(--big-fs,110px);line-height:.84;white-space:nowrap;color:var(--ink)}
+.big__n .d{display:inline-block;width:.385em;text-align:center}
+.big__n .s{display:inline-block;width:.2em;text-align:center;color:var(--amber)}
+.big__n .f{display:inline-block;width:.385em;text-align:center;font-size:.42em;line-height:1;margin-bottom:.06em;color:var(--amber-hi)}
+.big__n .pt{display:inline-block;width:.14em;text-align:center;font-size:.42em;line-height:1;margin-bottom:.06em;color:var(--amber)}
+.big__u{color:var(--ink-2);font-size:13px;letter-spacing:.08em;line-height:1.4;max-width:34ch}
+.count__hint{color:var(--ink-2);font-size:12.5px;min-height:1.5em}
+.count__line{font-family:var(--f-serif);font-style:italic;font-size:clamp(24px,6.8vw,38px);line-height:1.1;color:var(--amber-hi)}
+
+/* ---------- 4 · the ticket ---------- */
+.scene--rsvp .scene__body{gap:clamp(10px,1.8svh,20px)}
+.ticketWrap{position:relative;width:100%;transform:rotate(-1.4deg);filter:drop-shadow(0 22px 26px rgba(0,0,0,.6)) drop-shadow(0 4px 8px rgba(0,0,0,.5))}
+.ticket{
+  --stub:64px;--notch:11px;
+  position:relative;display:grid;grid-template-columns:minmax(0,1fr) var(--stub);
+  color:var(--paper-ink);
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.34),rgba(255,255,255,0) 34%,rgba(60,40,10,.08)),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .2 0 0 0 0 .14 0 0 0 0 .06 0 0 0 .55 -.12'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E"),
+    var(--paper);
+  -webkit-mask:
+    radial-gradient(circle var(--notch) at calc(100% - var(--stub)) 0,#0000 97%,#000) top/100% 51% no-repeat,
+    radial-gradient(circle var(--notch) at calc(100% - var(--stub)) 100%,#0000 97%,#000) bottom/100% 51% no-repeat;
+          mask:
+    radial-gradient(circle var(--notch) at calc(100% - var(--stub)) 0,#0000 97%,#000) top/100% 51% no-repeat,
+    radial-gradient(circle var(--notch) at calc(100% - var(--stub)) 100%,#0000 97%,#000) bottom/100% 51% no-repeat;
+}
+.ticket__main{display:flex;flex-direction:column;justify-content:space-between;gap:8px;padding:14px 12px 12px 14px;border-right:2px dashed rgba(20,16,13,.38)}
+.ticket__top{display:flex;justify-content:space-between;gap:8px;opacity:.78;font-size:11px}
+.ticket__title{font-family:var(--f-display);font-weight:400;text-transform:uppercase;font-size:clamp(46px,14.4vw,84px);line-height:.8;letter-spacing:.005em;width:min-content}
+.ticket__meta{display:flex;flex-wrap:wrap;gap:6px 16px;margin:0}
+.ticket__meta dt{font-size:10px;opacity:.55}
+.ticket__meta dd{margin:0;font-size:12.5px;letter-spacing:.08em;text-transform:uppercase}
+.ticket__fine{font-family:var(--f-mono);font-size:11.5px;line-height:1.4;letter-spacing:.015em;opacity:.8;padding-top:8px;border-top:1px solid rgba(20,16,13,.22)}
+.ticket__stub{display:grid;grid-template-rows:auto minmax(0,1fr) auto;justify-items:center;gap:8px;padding:12px 8px}
+.ticket__stubTop,.ticket__stubBot{opacity:.7;font-size:10px;letter-spacing:.1em}
+/* the bars fill whatever height the ticket has. they must not ask for height themselves, or a wide stub makes a very tall ticket */
+.barcode{position:relative;width:100%;min-height:0}
+.barcode svg{position:absolute;inset:0;display:block;width:100%;height:100%}
+
+.stamp{
+  --s:clamp(104px,33vw,190px);
+  position:absolute;left:calc(46% - var(--s) / 2);top:calc(48% - var(--s) / 2);width:var(--s);height:var(--s);
+  display:grid;place-items:center;align-content:center;
+  border:clamp(3px,.5vw,6px) solid #b8281a;border-radius:50%;color:#b8281a;
+  mix-blend-mode:multiply;filter:url(#ink);opacity:0;pointer-events:none;transform:rotate(-14deg);
+}
+.stamp__in{font-family:var(--f-display);font-size:calc(var(--s) * .56);line-height:.8;letter-spacing:.02em}
+.stamp__top,.stamp__bot{font-size:9px;letter-spacing:.22em}
+
+/* Coming? "Coming?" and the guilt trip take turns in one slot, so the page talks back in the same place */
+.ask{--g-fs:clamp(19px,5.6vw,28px);display:grid;gap:10px}
+.ask__say{display:grid;align-items:end;min-height:calc(var(--g-fs) * 2.3)}
+.ask__q,.ask__guilt{grid-area:1/1}
+.ask__q{font-family:var(--f-serif);font-size:clamp(28px,8vw,44px);line-height:1;color:var(--ink)}
+.ask__guilt{font-family:var(--f-serif);font-style:italic;font-size:var(--g-fs);line-height:1.14;color:var(--amber-hi);opacity:0}
+/* the stage is where Can't make it runs around. buttons stay 56px, so a 48px dodger fits under them */
+.ask__stage{position:relative;height:112px}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-width:48px;min-height:48px;font-family:var(--f-mono);font-size:14px;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap;-webkit-tap-highlight-color:transparent;transition:background .25s,color .25s,border-color .25s}
+.btn--yes{position:absolute;left:0;top:0;width:54%;height:56px;background:var(--amber);border:1px solid var(--amber);color:#150d05}
+.btn--yes:active{background:var(--amber-hi)}
+.btn--no{position:absolute;right:0;top:0;width:44%;height:56px;color:var(--ink);font-size:13px;letter-spacing:.06em}
+.btn--no .btn__v{display:grid;place-items:center;width:100%;height:100%;border:1px solid rgba(236,227,211,.4);background:rgba(10,8,7,.42);transform-origin:center}
+.btn--wa{position:absolute;left:0;top:0;width:100%;height:62px;background:var(--amber);border:1px solid var(--amber);color:#150d05;font-size:15px}
+.btn--wa:active{background:var(--amber-hi)}
+.btn--ghost{justify-self:start;min-height:52px;padding:0 24px;border:1px solid var(--amber);color:var(--amber-hi)}
+.btn--ghost:active{background:rgba(233,162,59,.2)}
+
+/* two links, or three if there is a map: always one row, always 48px tall */
+.links{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);justify-items:center;gap:0 4px}
+.textlink{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:4px 8px;color:var(--ink-2);font-size:12.5px;line-height:1.3;text-align:center;text-decoration:underline;text-decoration-color:rgba(236,227,211,.25);text-underline-offset:6px;-webkit-tap-highlight-color:transparent;transition:color .3s}
+.textlink:active{color:var(--amber-hi)}
+/* 320px: two links share 280px, so tighten the tracking and each label stays on one line */
+@media (max-width:340px){.links .textlink{font-size:11.5px;letter-spacing:.08em;padding:4px}}
+/* the small links, and for a few seconds after "Add to calendar" the other ways in. one grid cell, so the page never grows */
+.more{display:grid}
+.more>*{grid-area:1/1}
+.more.is-alt .links{visibility:hidden}
+.cal-alt{display:flex;flex-wrap:nowrap;align-items:center;justify-content:center;gap:0 2px;min-height:48px;color:var(--ink-2);font-size:12px;letter-spacing:.06em;white-space:nowrap}
+.cal-alt a{display:inline-flex;align-items:center;justify-content:center;min-height:48px;min-width:48px;padding:0 10px;color:var(--amber-hi);text-decoration:underline;text-underline-offset:6px;-webkit-tap-highlight-color:transparent}
+@media (max-width:340px){.cal-alt{font-size:11.5px}.cal-alt a{padding:0 8px}}
+@media (hover:hover) and (pointer:fine){
+  .opt:hover{border-color:var(--amber);background:rgba(233,162,59,.12)}
+  .opt.is-picked:hover{background:var(--amber)}
+  .btn--yes:hover{background:var(--amber-hi)}
+  .btn--no:hover .btn__v{border-color:var(--ink)}
+  .btn--ghost:hover{background:rgba(233,162,59,.18)}
+  .btn--wa:hover{background:var(--amber-hi)}
+  .textlink:hover{color:var(--amber-hi)}
+}
+
+/* ---------- the film disclaimer, and the cigarette ---------- */
+.disclaimer{position:fixed;z-index:36;left:50%;bottom:calc(var(--sa-b) + 10px);transform:translateX(-50%);width:max-content;max-width:calc(100vw - 24px);margin:0;text-align:center;font:400 13px/1.25 Arial,Helvetica,sans-serif;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.95),0 0 8px rgba(0,0,0,.75);pointer-events:none;opacity:0;transition:opacity .5s}
+.disclaimer.is-on{opacity:.95}
+
+.cig{--burn:0px;position:fixed;z-index:37;right:max(7px,var(--sa-r));top:calc(var(--bar-h) + var(--sa-t) + 16px);bottom:calc(var(--sa-b) + 56px);width:5px;pointer-events:none;opacity:0;transition:opacity .8s,transform .8s var(--ease);transform-origin:50% 100%}
+html.is-live .cig{opacity:1}
+.cig i{position:absolute;left:0;right:0;display:block}
+.cig__filter{bottom:0;height:14px;background:linear-gradient(90deg,#a8672f,#d9a15f 50%,#a8672f);border-radius:0 0 2px 2px}
+.cig__paper{top:var(--burn);bottom:14px;background:linear-gradient(90deg,#cfc7b8,#f4eee2 45%,#cfc7b8)}
+.cig__ember{top:calc(var(--burn) - 3px);height:5px;border-radius:2px;background:linear-gradient(#ffd89a,#ff7a2b 60%,#c2330c);box-shadow:0 0 8px 2px rgba(255,120,40,.75),0 0 18px 4px rgba(255,90,20,.35);animation:glow 1.3s ease-in-out infinite}
+@keyframes glow{0%,100%{opacity:.85}50%{opacity:1}}
+.cig__ash{top:calc(var(--burn) - 3px - var(--ash,0px));height:var(--ash,0px);background:linear-gradient(#8e877d,#5c564f);border-radius:2px 2px 0 0;transform-origin:50% 100%}
+.cig__wisp{top:calc(var(--burn) - 40px);height:36px;left:2px;right:2px;width:1px;background:linear-gradient(transparent,rgba(214,204,188,.5));opacity:.0;filter:blur(.6px);transform-origin:50% 100%;animation:wisp 3.2s ease-in-out infinite}
+@keyframes wisp{0%{opacity:0;transform:translateY(8px) scaleY(.4)}30%{opacity:.5}100%{opacity:0;transform:translateY(-14px) scaleY(1.2) translateX(3px)}}
+.cig.is-out{transform:rotate(7deg)}
+.cig.is-out .cig__ember{animation:none;opacity:0;transition:opacity .6s}
+.cig.is-out .cig__ash{--ash:0px}
+.cig.is-out .cig__wisp{height:70px;top:calc(var(--burn) - 74px);animation-duration:5s}
+
+/* ---------- big screens ---------- */
+@media (min-width:760px){
+  :root{--pad:clamp(28px,5vw,96px)}
+  .scene__body{max-width:640px}
+  .scene--name .scene__body{max-width:980px}
+  .hero__name{font-size:min(20vw,38svh);white-space:nowrap}
+  .hero__name .w{display:inline-block}
+  .hero__foot{grid-template-columns:auto 1fr;align-items:baseline;gap:6px 28px}
+  .hero__joke{grid-column:2}
+  .hero__age{grid-column:2}
+  .quiz{--q-fs:clamp(34px,4.2vw,52px)}
+  .scene--rsvp .scene__body{max-width:760px}
+  .ticket{--stub:120px;--notch:15px}
+  .ticket__title{font-size:clamp(70px,9vw,120px);width:auto}
+  .ticket__meta dd{font-size:14px}
+  .ticket__fine{font-size:13px}
+  .stamp{--s:clamp(150px,18vw,210px)}
+}
+
+/* ---------- landscape phones: not much height, so the scenes sit side by side ---------- */
+@media (max-height:520px) and (orientation:landscape){
+  .scene{padding-top:calc(var(--bar-h) + var(--sa-t) + 2px);padding-bottom:calc(var(--sa-b) + 58px)}
+  .scene--rsvp{padding-bottom:calc(var(--sa-b) + 34px)}
+  .scene__body{max-width:none;gap:10px}
+  .next{bottom:calc(var(--sa-b) + 30px)}
+
+  .scene--name .scene__body{max-width:none}
+  .hero__name{font-size:min(30svh,20vw);white-space:nowrap}
+  .hero__name .w{display:inline-block}
+  .hero__hb{font-size:clamp(20px,6svh,30px)}
+  .hero__foot{grid-template-columns:auto 1fr;gap:4px 24px;padding-top:8px}
+  .hero__joke{font-size:clamp(18px,5.6svh,26px);grid-column:2}
+  .hero__age{grid-column:2;font-size:18px}
+
+  .scene--quiz .scene__body{grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:28px;align-items:center}
+  .scene--quiz .eyebrow{grid-column:1/-1}
+  .scene--quiz .quiz{display:contents}
+  .quiz{--q-fs:clamp(20px,6.4svh,30px)}
+  .quiz__stage{grid-column:1;grid-row:2}
+  .quiz__opts{grid-column:2;grid-row:2;gap:8px}
+  .opt{min-height:52px;font-size:26px}
+  .pips{grid-column:1;grid-row:3}
+
+  .scene--count .scene__body{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);column-gap:28px;align-items:center}
+  .scene--count .eyebrow{grid-column:1/-1}
+  .scene--count .big,.scene--count .pips{grid-column:1}
+  .count__hint,.count__line,#countMap{grid-column:2}
+  .count__line{font-size:clamp(20px,6svh,28px)}
+
+  .scene--rsvp .scene__body{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);column-gap:24px;align-items:center;max-width:none}
+  .scene--rsvp .ticketWrap{grid-column:1;grid-row:1/3}
+  .scene--rsvp .ask{grid-column:2;grid-row:1}
+  .scene--rsvp .more{grid-column:2;grid-row:2}
+  .ticket{--stub:84px;--notch:12px}
+  .ticket__title{font-size:clamp(40px,11svh,60px)}
+  .ticket__fine{font-size:11.5px}
+  .ask{--g-fs:clamp(16px,4.6svh,22px)}
+  .ask__q{font-size:clamp(22px,6.4svh,32px)}
+}
+
+/* a phone on its side with the browser bars showing can be under 340px tall: a scene no longer fits one screen.
+   let the page scroll freely (nothing to snap to, nothing to get stuck on) and drop the two fixed extras that would sit on the content */
+@media (max-height:339px) and (orientation:landscape){
+  html{scroll-snap-type:none}
+  .next,.disclaimer{display:none}
+}
+
+/* ---------- small phones, short: tighten a little so a scene still fits one screen ---------- */
+@media (max-width:760px) and (max-height:680px) and (orientation:portrait){
+  .scene{padding-bottom:calc(var(--sa-b) + 84px)}
+  .scene--rsvp{padding-bottom:calc(var(--sa-b) + 40px)}
+  .ticket__top{font-size:10px}
+  .ticket__fine{font-size:11px;padding-top:6px}
+}
+
+/* ---------- small screens, gate ---------- */
+@media (max-width:760px){
+  :root{--bar-h:56px}
+  .gate{--d:min(170vw,84vh,900px);--hide:.56}
+  .gate__copy{top:31%}
+  .wish{top:70%}
+}
+@supports (height:1svh){@media (max-width:760px){.gate{--d:min(170vw,84svh,900px)}}}
+
+/* no WebGL: the room becomes a plain warm gradient and the intro is skipped */
+html.no-gl #smoke{display:none}
+html.no-gl body{background:radial-gradient(90% 70% at 50% 0%,#2b1e11,#0a0807 72%) fixed}
+
+@media (prefers-reduced-motion:reduce){
+  .grain,.eq i,.next.is-ready,.cig__ember,.cig__wisp{animation:none}
+  html{scroll-behavior:auto}
+}

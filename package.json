@@ -1,0 +1,21 @@
+{
+  "name": "yuvraj-birthday-invite",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Birthday invitation. Vanilla JS, GSAP, one WebGL smoke shader. Dates live in party.config.js.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@fontsource/dm-mono": "5.3.0",
+    "@fontsource/instrument-serif": "5.3.0",
+    "@fontsource/league-gothic": "5.3.0",
+    "gsap": "3.15.0"
+  },
+  "devDependencies": {
+    "vite": "6.4.4"
+  }
+}

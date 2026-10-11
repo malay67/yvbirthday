@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en" class="is-locked">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <!--party:head-->
+  <meta name="theme-color" content="#0a0807" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <script>document.documentElement.classList.add('js')</script>
+</head>
+<body>
+
+  <!-- the room: smoke, flame, light. one WebGL canvas, fixed behind everything -->
+  <canvas id="smoke" aria-hidden="true"></canvas>
+
+  <header class="bar" id="bar">
+    <p class="bar__mark mono">
+      <span class="bar__markA" data-bind="barA"></span>
+      <span class="bar__markB" data-bind="barB"></span>
+    </p>
+    <nav class="bar__nav mono" aria-label="Page">
+      <a class="bar__link" href="#scene-rsvp" data-to="#scene-rsvp"><span data-copy="bar.rsvp"></span></a>
+      <button class="bar__sound" id="soundBtn" type="button" aria-pressed="true" data-copy-label="bar.sound">
+        <span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        <span class="bar__soundTxt" id="soundTxt"></span>
+      </button>
+    </nav>
+  </header>
+
+  <!-- ACT 1 to 3: the gate. a wheel, a flame, a wish -->
+  <section class="gate" id="gate" aria-label="Intro">
+    <div class="gate__copy" id="gateCopy">
+      <p class="gate__dark" id="gateDark" data-copy="intro.dark"></p>
+      <p class="gate__hint mono" id="gateHint"></p>
+    </div>
+
+    <div class="wish" id="wish">
+      <p class="wish__line" id="wishLine" data-copy="intro.wish"></p>
+      <p class="wish__hint mono" id="wishHint"></p>
+    </div>
+
+    <div class="wheelRig" id="wheelRig">
+      <div class="wheel" id="wheel" role="button" tabindex="0"
+           aria-label="Lighter wheel. Spin it, or press Enter, to light the flame.">
+        <svg class="wheel__svg" viewBox="-300 -300 600 600" aria-hidden="true" focusable="false">
+          <!-- knurled rim: a thick ring cut into 120 teeth -->
+          <circle r="276" fill="none" stroke="#0c0a09" stroke-width="44" />
+          <circle r="276" fill="none" stroke="#38322d" stroke-width="42" pathLength="240" stroke-dasharray="1 1" />
+          <circle r="296" fill="none" stroke="#6d655b" stroke-width="3" pathLength="240" stroke-dasharray="1 1" stroke-dashoffset=".5" opacity=".7" />
+          <!-- face -->
+          <circle r="254" fill="#0f0d0c" />
+          <circle r="250" fill="#161311" stroke="#000" stroke-width="2" />
+          <circle r="214" fill="none" stroke="rgba(236,227,211,.07)" stroke-width="1.5" />
+          <circle r="100" fill="none" stroke="rgba(236,227,211,.07)" stroke-width="1.5" />
+          <!-- lightening holes: they make the spin readable -->
+          <g fill="#070605" stroke="rgba(236,227,211,.13)" stroke-width="2">
+            <circle cx="0" cy="-152" r="46" />
+            <circle cx="131.6" cy="-76" r="46" />
+            <circle cx="131.6" cy="76" r="46" />
+            <circle cx="0" cy="152" r="46" />
+            <circle cx="-131.6" cy="76" r="46" />
+            <circle cx="-131.6" cy="-76" r="46" />
+          </g>
+          <!-- hub -->
+          <circle r="56" fill="#1d1916" stroke="rgba(236,227,211,.2)" stroke-width="2" />
+          <circle r="11" fill="#070605" />
+          <path d="M-32 0H32" stroke="rgba(236,227,211,.28)" stroke-width="6" stroke-linecap="round" />
+          <!-- one marker, so you can see which way it is turning -->
+          <circle cx="0" cy="-232" r="6" fill="#e9a23b" opacity=".55" />
+        </svg>
+      </div>
+      <div class="wheelLight" aria-hidden="true"></div>
+    </div>
+
+    <!-- fingers land here, not on the wheel itself. it stops short of the screen edges, where the phone's own back-swipe starts -->
+    <div class="wheelGrip" id="wheelGrip" aria-hidden="true"></div>
+
+    <button class="skip mono" id="skip" type="button" data-copy="intro.skip"></button>
+  </section>
+
+  <!-- AFTER THE INTRO: four scenes, one joke and one tap each -->
+  <main id="main" inert>
+
+    <!-- 1 · his name -->
+    <section class="scene scene--name" id="scene-name" aria-labelledby="heroTitle">
+      <div class="scene__body">
+        <h1 class="hero__title" id="heroTitle">
+          <span class="hero__hb" id="heroHb" aria-hidden="true" data-copy="hero.hello"></span>
+          <span class="hero__nameBox">
+            <span class="hero__name" id="heroName" aria-hidden="true"></span>
+            <button class="hero__cough" id="heroCough" type="button" data-copy-label="hero.tap"></button>
+          </span>
+        </h1>
+        <div class="hero__foot" id="heroFoot">
+          <p class="hero__party mono" data-copy="hero.party"></p>
+          <p class="hero__joke" data-copy="hero.joke"></p>
+          <p class="hero__age" id="heroAge" data-copy="hero.age" hidden></p>
+        </div>
+        <p class="hero__tap mono" id="heroTap" aria-live="polite" data-copy="hero.tap"></p>
+      </div>
+      <button class="next" type="button" data-copy-label="nav.next"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9l7 7 7-7" /></svg></button>
+    </section>
+
+    <!-- 2 · who do you call? -->
+    <section class="scene scene--quiz" id="scene-quiz" aria-labelledby="quizTitle">
+      <div class="scene__body">
+        <p class="eyebrow mono" id="quizTitle" data-copy="quiz.title"></p>
+        <div class="quiz" id="quiz">
+          <div class="quiz__stage" id="quizStage">
+            <p class="quiz__q" id="quizQ" aria-live="polite"></p>
+            <p class="quiz__a" id="quizA" aria-live="polite"><span class="quiz__ok mono" id="quizOk"></span><span class="quiz__p" id="quizP"></span></p>
+          </div>
+          <div class="quiz__opts" id="quizOpts"></div>
+          <ol class="pips" id="quizPips" aria-hidden="true"><li></li><li></li><li></li></ol>
+        </div>
+      </div>
+      <button class="next" type="button" data-copy-label="nav.next"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9l7 7 7-7" /></svg></button>
+    </section>
+
+    <!-- 3 · the countdown, in his time -->
+    <section class="scene scene--count" id="scene-count" aria-labelledby="countEyebrow">
+      <div class="scene__body">
+        <p class="eyebrow mono" id="countEyebrow"></p>
+        <button class="big" id="bigBtn" type="button">
+          <span class="big__n" id="bigN" role="timer" aria-live="off"></span>
+          <span class="big__u mono" id="bigU"></span>
+        </button>
+        <ol class="pips" id="countPips" aria-hidden="true"></ol>
+        <p class="count__hint mono" id="countHint" data-copy="count.hint"></p>
+        <p class="count__line" id="countLine" aria-live="polite"></p>
+        <a class="btn btn--ghost" id="countMap" target="_blank" rel="noopener" hidden data-copy="count.map"></a>
+      </div>
+      <button class="next" type="button" data-copy-label="nav.next"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9l7 7 7-7" /></svg></button>
+    </section>
+
+    <!-- 4 · the ticket -->
+    <section class="scene scene--rsvp" id="scene-rsvp" aria-label="RSVP">
+      <div class="scene__body">
+        <div class="ticketWrap" id="ticketWrap">
+          <article class="ticket" id="ticket">
+            <div class="ticket__main">
+              <div class="ticket__top mono"><span data-copy="rsvp.admit"></span><span data-copy="rsvp.no"></span></div>
+              <h2 class="ticket__title" data-copy="rsvp.title"></h2>
+              <dl class="ticket__meta mono">
+                <div><dt data-copy="rsvp.date"></dt><dd data-copy="rsvp.dateVal"></dd></div>
+                <div><dt data-copy="rsvp.time"></dt><dd data-copy="rsvp.timeVal"></dd></div>
+                <div><dt data-copy="rsvp.place"></dt><dd data-copy="rsvp.placeVal"></dd></div>
+              </dl>
+              <p class="ticket__fine" data-copy="rsvp.fine"></p>
+            </div>
+            <div class="ticket__stub" aria-hidden="true">
+              <p class="ticket__stubTop mono" data-copy="rsvp.stub"></p>
+              <div class="barcode" id="barcode"></div>
+              <p class="ticket__stubBot mono" data-copy="rsvp.stampBottom"></p>
+            </div>
+          </article>
+          <div class="stamp" id="stamp" aria-hidden="true">
+            <span class="stamp__top mono" data-copy="rsvp.stampTop"></span>
+            <span class="stamp__in" data-copy="rsvp.stampBig"></span>
+            <span class="stamp__bot mono" data-copy="rsvp.stampBottom"></span>
+          </div>
+        </div>
+
+        <div class="ask" id="ask">
+          <!-- "Coming?" and the guilt trip share one slot: the page talks back in the same place -->
+          <div class="ask__say" aria-live="polite">
+            <p class="ask__q" id="askQ" data-copy="rsvp.ask"></p>
+            <p class="ask__guilt" id="guilt"></p>
+          </div>
+          <div class="ask__stage" id="askStage">
+            <button class="btn btn--yes" id="yesBtn" type="button"><span class="btn__v" data-copy="rsvp.yes"></span></button>
+            <button class="btn btn--no" id="noBtn" type="button"><span class="btn__v" id="noV" data-copy="rsvp.nope"></span></button>
+            <!-- once he says Obviously, this takes the place of the yes button -->
+            <a class="btn btn--wa" id="waLink" target="_blank" rel="noopener" hidden data-copy="rsvp.whatsapp"></a>
+          </div>
+        </div>
+
+        <!-- the small links. for a few seconds after "Add to calendar" the other ways in sit on top of them, so the page never grows -->
+        <div class="more" id="more">
+          <nav class="links" aria-label="More">
+            <button class="textlink mono" id="calBtn" type="button" data-copy="rsvp.calendar"></button>
+            <a class="textlink mono" id="mapLink" target="_blank" rel="noopener" hidden data-copy="rsvp.map"></a>
+            <button class="textlink mono" id="againBtn" type="button" data-copy="rsvp.again"></button>
+          </nav>
+          <p class="cal-alt mono" id="calAlt" hidden>
+            <span data-copy="rsvp.calendarFail"></span>
+            <a id="calGoogle" target="_blank" rel="noopener" data-copy="rsvp.calendarGoogle" data-copy-label="rsvp.calendarGoogleLabel"></a>
+            <a id="calFile" download data-copy="rsvp.calendarFile" data-copy-label="rsvp.calendarFileLabel"></a>
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- the small white line at the bottom, like before a film -->
+  <p class="disclaimer" id="disclaimer" aria-live="polite"></p>
+  <!-- scroll progress: a cigarette that burns down as you go -->
+  <div class="cig" id="cig" aria-hidden="true">
+    <i class="cig__ash"></i><i class="cig__ember"></i><i class="cig__paper"></i><i class="cig__filter"></i>
+    <i class="cig__wisp"></i>
+  </div>
+
+  <canvas id="sparks" aria-hidden="true"></canvas>
+  <div class="vignette" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+
+  <!-- ink bleed for the stamp -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <filter id="ink" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="4" result="n" />
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="3.2" />
+    </filter>
+  </svg>
+
+  <noscript>
+    <p style="position:fixed;inset:0;z-index:99;display:grid;place-items:center;background:#0a0807;color:#ece3d3;font:20px/1.4 Georgia,serif;text-align:center;padding:24px">
+      <!--party:noscript-->
+    </p>
+  </noscript>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

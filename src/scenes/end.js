@@ -6,7 +6,7 @@ const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 /*
   Scene 7. Closing time. "See you Monday." and one button: Light it again, which starts the whole thing over from the dark.
 */
-export function initEnd() {
+export function initEnd({ colophon } = {}) {
   const scene = $('#scene-end')
 
   $('#againBtn').addEventListener('click', () => {
@@ -18,6 +18,8 @@ export function initEnd() {
     else window.location.href = u.href
   })
 
+  // the credits for the type
+  $('#fontsBtn')?.addEventListener('click', () => colophon && colophon.open())
   return {
     // called the first time the scene is on screen
     enter() {

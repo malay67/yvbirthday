@@ -3,6 +3,7 @@ import { copy } from '../copy.js'
 import { fill } from '../lib/party.js'
 import { buzz } from '../fx/haptics.js'
 import { drawPoster, loadFonts } from './posters.js'
+import { openSheet, closeSheet, trapSheet as trap } from '../ui/sheet.js'
 
 const $ = (s, r = document) => r.querySelector(s)
 const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -220,72 +221,6 @@ export function initPrint({ P, T, sfx }) {
   }
   anotherBtn.addEventListener('click', another)
   sheet.addEventListener('click', another)
-
-  /* ---------- sheets: full screen, fixed, keyboard safe ---------- */
-  // The typing sheet fills the screen and keeps its fields at the top. A phone's keyboard shrinks the visible
-  // part of the page from the bottom, so nothing the guest needs is ever under it. (visualViewport tells us where
-  // the visible part is, because on some phones a fixed box does not follow it by itself.)
-  const vv = window.visualViewport
-  const open = new Set()
-  let lastFocus = null
-  const syncVV = () => {
-    if (!vv) return
-    open.forEach((el) => {
-      el.style.setProperty('--vvh', Math.round(vv.height) + 'px')
-      el.style.setProperty('--vvt', Math.round(vv.offsetTop) + 'px')
-    })
-  }
-  if (vv) {
-    vv.addEventListener('resize', syncVV)
-    vv.addEventListener('scroll', syncVV)
-  }
-  const lock = (on) => {
-    document.documentElement.classList.toggle('is-sheet', on)
-    // nothing behind a sheet can be tabbed to or tapped
-    for (const el of [$('#main'), $('#bar')]) if (el) el.inert = on
-  }
-  function openSheet(el, focusEl) {
-    lastFocus = document.activeElement
-    open.add(el)
-    el.hidden = false
-    lock(true)
-    syncVV()
-    // focus right away, inside the tap: iPhone only raises the keyboard for a focus() that happens in the gesture
-    if (focusEl) {
-      focusEl.focus({ preventScroll: true })
-      if (focusEl.select) focusEl.select()
-    }
-  }
-  function closeSheet(el) {
-    el.hidden = true
-    open.delete(el)
-    el.style.removeProperty('--vvh')
-    el.style.removeProperty('--vvt')
-    if (!open.size) lock(false)
-    if (lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll: true })
-  }
-  // Escape closes, Tab stays inside
-  function trap(el, close) {
-    el.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        e.preventDefault()
-        close()
-        return
-      }
-      if (e.key !== 'Tab') return
-      const f = Array.from(el.querySelectorAll('input,button,a[href]')).filter((x) => !x.disabled && !x.hidden && x.offsetParent !== null)
-      if (!f.length) return
-      const first = f[0]
-      const last = f[f.length - 1]
-      if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault()
-        last.focus()
-      } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault()
-        first.focus()
-      }
-    })
-  }
 
   /* ---------- write your own ---------- */
   const writeSheet = $('#writeSheet')

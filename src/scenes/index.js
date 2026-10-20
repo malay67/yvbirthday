@@ -5,10 +5,21 @@ import { initCount } from './count.js'
 import { initRsvp } from './rsvp.js'
 import { initPrint } from './print.js'
 import { initEnd } from './end.js'
+import { initColophon } from './colophon.js'
+import { initArchive } from './archive.js'
 
 const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 const $ = (s, r = document) => r.querySelector(s)
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v))
+// run something that is nice to have: an error in it is reported but never stops the page
+const soft = (fn, fallback) => {
+  try {
+    return fn()
+  } catch (err) {
+    console.warn('[extra]', err)
+    return fallback
+  }
+}
 
 /*
   Everything that lives after the intro: the scenes, on native scroll-snap.
@@ -48,7 +59,10 @@ export function initScenes({ P, T, smoke, sparks, sfx, clock, extras = [] }) {
   const count = initCount({ P, T, clock, sfx })
   const rsvp = initRsvp({ P, T, sparks, sfx })
   const print = initPrint({ P, T, sfx })
-  const end = initEnd()
+  // the search and the credits are extras. if either one fails to start, the page carries on without it
+  const colophon = soft(() => initColophon(), { open() {} })
+  const end = initEnd({ colophon })
+  soft(() => initArchive({ P, T, sfx, goto, collection, colophon }))
 
   const enter = {
     'scene-quiz': () => quiz.enter(),

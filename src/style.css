@@ -680,3 +680,63 @@ html.is-sheet{overflow:hidden}
   .end__note{grid-column:2;grid-row:2;font-size:clamp(20px,6svh,28px)}
   .end__again{grid-column:2;grid-row:3;margin-top:0}
 }
+
+/* ============================================================
+   THE SEARCH and "FONTS IN USE"
+   Same sheets as the Print Room (full screen, fixed, keyboard safe), a magnifier in the bar, and a credits link on the last screen.
+   ============================================================ */
+/* the magnifier in the top bar: out of sight until the intro is over, like the RSVP link */
+.bar__search{display:inline-flex;align-items:center;justify-content:center;min-width:48px;min-height:48px;padding:0 10px;color:inherit;opacity:0;pointer-events:none;transition:opacity .7s var(--ease);-webkit-tap-highlight-color:transparent}
+html.is-live .bar__search{opacity:1;pointer-events:auto}
+.bar__search:disabled{pointer-events:none}
+.bar__search svg{display:block;width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+/* a narrow phone: the search, RSVP and sound keep 48px each, and the gaps between them go */
+@media (max-width:340px){
+  .bar__nav{gap:0}
+  .bar__link{padding:0 6px}
+  .bar__search{padding:0 4px}
+}
+.scene:focus{outline:none}
+
+/* a title with a close button, at the top of a sheet */
+.sheet__top{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:48px}
+.sheet__x{display:grid;place-items:center;flex:none;width:48px;height:48px;margin-right:-12px;color:var(--ink);-webkit-tap-highlight-color:transparent}
+.sheet__x svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round}
+.sheet__x:active{color:var(--amber-hi)}
+@media (hover:hover) and (pointer:fine){.sheet__x:hover{color:var(--amber-hi)}}
+
+/* the search: the box stays at the top while the results scroll under it */
+.sheet--srch{padding-top:0}
+.srch__head{position:sticky;top:0;z-index:2;display:grid;gap:8px;padding:calc(var(--sa-t) + 10px) 0 10px;background:var(--bg)}
+.sheet--srch .field__in::-webkit-search-cancel-button,.sheet--srch .field__in::-webkit-search-decoration{-webkit-appearance:none;appearance:none;display:none}
+.srch__status{margin:0;min-height:1.5em;color:var(--ink-2);font-size:12.5px}
+.srch__try{display:flex;flex-wrap:wrap;gap:8px}
+.srch__chip{display:inline-flex;align-items:center;min-height:48px;padding:0 16px;border:1px solid rgba(236,227,211,.4);color:var(--ink);font-size:13px;-webkit-tap-highlight-color:transparent}
+.srch__chip:active{background:rgba(233,162,59,.2);border-color:var(--amber)}
+.srch__list{display:grid;gap:10px;margin:0;padding:0;list-style:none}
+.hit{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:12px;row-gap:3px;align-items:start;width:100%;padding:12px 14px;text-align:left;border:1px solid rgba(236,227,211,.3);background:rgba(236,227,211,.05);-webkit-tap-highlight-color:transparent}
+button.hit{min-height:64px}
+button.hit:active{background:rgba(233,162,59,.18);border-color:var(--amber)}
+.hit__k{grid-column:1;color:var(--ink-2);font-size:11.5px}
+.hit__t{grid-column:1;font-family:var(--f-display);text-transform:uppercase;font-size:30px;line-height:.95;letter-spacing:.01em;overflow-wrap:anywhere}
+.hit__side{grid-column:2;grid-row:1 / span 2;align-self:center;display:flex;gap:4px;color:var(--amber-hi)}
+.hit__side i{display:block;width:12px;height:12px;background:var(--c);border:1px solid rgba(236,227,211,.55)}
+.hit__side svg{display:block;width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.hit__s{grid-column:1 / -1;font-family:var(--f-serif);font-style:italic;font-size:19px;line-height:1.12;color:var(--amber-hi)}
+.hit--note{border-style:dashed;background:none}
+.hit--note .hit__s{font-size:22px;color:var(--ink)}
+@media (hover:hover) and (pointer:fine){button.hit:hover{border-color:var(--amber);background:rgba(233,162,59,.1)}}
+
+/* "Fonts in use": a bone-paper label per typeface, on the dark sheet */
+.colo__intro{margin:0;font-family:var(--f-serif);font-style:italic;font-size:22px;line-height:1.15;color:var(--amber-hi)}
+.colo__list{display:grid;gap:14px;margin:0;padding:0;list-style:none}
+.colo__item{padding:14px;color:var(--paper-ink);background:var(--paper-tex),var(--paper);filter:drop-shadow(0 8px 10px rgba(0,0,0,.5))}
+.colo__name{margin:0 0 10px;font-weight:400;line-height:.92;overflow-wrap:anywhere}
+.colo__name--display{font-family:var(--f-display);text-transform:uppercase;font-size:clamp(40px,12vw,56px);letter-spacing:.005em}
+.colo__name--serif{font-family:var(--f-serif);font-style:italic;font-size:clamp(36px,10.5vw,50px)}
+.colo__name--mono{font-family:var(--f-mono);text-transform:uppercase;letter-spacing:.04em;font-size:clamp(24px,7vw,32px)}
+.colo__foot{margin:0;font-family:var(--f-serif);font-style:italic;font-size:18px;line-height:1.2;color:var(--ink-2);text-wrap:balance}
+/* the Collection card shrinks its rows to fit one screen. this one scrolls, so the rows stay 16px on any screen height */
+.colo__item .obj__meta{font-size:16px}
+.colo__item .obj__meta>div{padding:6px 0}
+.end__fonts{margin-top:-8px}

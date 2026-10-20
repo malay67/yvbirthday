@@ -21,6 +21,7 @@
       <span class="bar__markB" data-bind="barB"></span>
     </p>
     <nav class="bar__nav mono" aria-label="Page">
+      <button class="bar__search" id="searchBtn" type="button" disabled data-copy-label="archive.open"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.6 4.2c3.5-.2 6.2 2.5 6.1 6-.1 3.4-2.8 6-6.2 5.9-3.4-.1-5.9-2.8-5.8-6.1.1-3.2 2.6-5.7 5.9-5.8z" /><path d="M15.3 15.4l4.6 4.5" /></svg></button>
       <a class="bar__link" href="#scene-rsvp" data-to="#scene-rsvp"><span data-copy="bar.rsvp"></span></a>
       <button class="bar__sound" id="soundBtn" type="button" aria-pressed="true" data-copy-label="bar.sound">
         <span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
@@ -268,6 +269,7 @@
         <h2 class="end__big" id="endBig"><span data-copy="end.bigA"></span> <span class="end__b" data-copy="end.bigB"></span></h2>
         <p class="end__note" data-copy="end.note"></p>
         <button class="btn btn--ghost end__again" id="againBtn" type="button" data-copy="end.again"></button>
+        <button class="textlink mono end__fonts" id="fontsBtn" type="button" data-copy="colophon.link"></button>
       </div>
     </section>
   </main>
@@ -290,6 +292,39 @@
         <button class="btn btn--solid" id="writeDone" type="submit" data-copy="print.sheet.done"></button>
       </div>
     </form>
+  </div>
+
+  <!-- the search: the magnifier in the top bar opens it. results are built by scenes/archive.js from copy.js -->
+  <div class="sheet sheet--srch" id="archiveSheet" role="dialog" aria-modal="true" aria-labelledby="archiveTitle" tabindex="-1" hidden>
+    <div class="sheet__panel">
+      <div class="srch__head">
+        <div class="sheet__top">
+          <h2 class="sheet__title mono" id="archiveTitle" data-copy="archive.title"></h2>
+          <button class="sheet__x" id="archiveClose" type="button" data-copy-label="archive.close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12" /><path d="M18 6L6 18" /></svg></button>
+        </div>
+        <form id="archiveForm" role="search" autocomplete="off">
+          <label class="sr-only" for="archiveQ" data-copy="archive.inputLabel"></label>
+          <input class="field__in field__in--big" id="archiveQ" type="search" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="search" />
+        </form>
+        <p class="srch__status mono" id="archiveStatus" role="status"></p>
+      </div>
+      <div class="srch__try" id="archiveTry"></div>
+      <ul class="srch__list" id="archiveList"></ul>
+    </div>
+  </div>
+
+  <!-- "Fonts in use": who made the type. opened by the small link on the last screen (and by the search) -->
+  <div class="sheet sheet--colo" id="coloSheet" role="dialog" aria-modal="true" aria-labelledby="coloTitle" tabindex="-1" hidden>
+    <div class="sheet__panel">
+      <div class="sheet__top">
+        <h2 class="sheet__title mono" id="coloTitle" data-copy="colophon.title"></h2>
+        <button class="sheet__x" id="coloClose" type="button" data-copy-label="colophon.close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12" /><path d="M18 6L6 18" /></svg></button>
+      </div>
+      <p class="colo__intro" data-copy="colophon.intro"></p>
+      <ol class="colo__list" id="coloList"></ol>
+      <p class="colo__foot" data-copy="colophon.foot"></p>
+      <button class="btn btn--line" id="coloDone" type="button" data-copy="colophon.close"></button>
+    </div>
   </div>
 
   <!-- if the phone cannot share a picture, the poster opens here, big, to press and hold or download -->

@@ -103,6 +103,7 @@ export const copy = {
   // In `rows`, each pair is [label, text]. Keep it to two or three short rows.
   // `short` is the little name used in the WhatsApp message ("Collected: the lighter (not his), ...").
   // `art` is the name of the drawing (they live in src/scenes/collection-art.js).
+  // `tags` are extra words that find the object in the search (the magnifier in the top bar). Plain lowercase words.
   collection: {
     title: `The {name} Collection`, // the small line above the cards
     acc: `Acc. no. {accession}`, // top of every card. the number is worked out for you
@@ -120,13 +121,13 @@ export const copy = {
     slide: `{title}, {n} of {total}`, // screen readers, when the card changes
     stubCount: `{n}/{total}`, // on the ticket stub, under the little punch card
 
-    // five colours. the hex codes are real: they paint the squares and tint the room.
+    // five colours. the hex codes are real: they paint the squares and tint the room. `words` are other names for it in the search.
     swatches: [
-      { id: `amber`, name: `Last Peg Amber`, hex: `#E9A23B` },
-      { id: `black`, name: `3 AM Black`, hex: `#0A0807` },
-      { id: `ash`, name: `Ash`, hex: `#A39A8D` },
-      { id: `ember`, name: `Ember`, hex: `#FF6A2B` },
-      { id: `yellow`, name: `Kaali-Peeli Yellow`, hex: `#F4C20D` },
+      { id: `amber`, name: `Last Peg Amber`, hex: `#E9A23B`, words: [`gold`] },
+      { id: `black`, name: `3 AM Black`, hex: `#0A0807`, words: [`dark`, `night`] },
+      { id: `ash`, name: `Ash`, hex: `#A39A8D`, words: [`grey`, `gray`] },
+      { id: `ember`, name: `Ember`, hex: `#FF6A2B`, words: [`red`, `orange`, `fire`, `glow`] },
+      { id: `yellow`, name: `Kaali-Peeli Yellow`, hex: `#F4C20D`, words: [`taxi`, `kaali`, `peeli`] },
     ],
 
     // card 1 is the wall label for the man himself. then the things from his life.
@@ -144,6 +145,7 @@ export const copy = {
         note: `On view {partyDay}, {time}. Do not touch the lighter.`,
         colours: [`ash`, `amber`, `black`],
         art: `man`,
+        tags: [`him`, `human`, `portrait`, `loyalty`, `birthday`], // extra words that find it in the search
       },
       {
         id: `lighter`,
@@ -157,6 +159,7 @@ export const copy = {
         note: `He has four. Still asks for yours.`,
         colours: [`ember`, `yellow`],
         art: `lighter`,
+        tags: [`flame`, `fire`, `light`, `zippo`, `match`, `borrowed`], // extra words that find it in the search
       },
       {
         id: `phone`,
@@ -170,6 +173,7 @@ export const copy = {
         note: `Battery 4%. Answered anyway.`,
         colours: [`black`, `ash`],
         art: `phone`,
+        tags: [`call`, `mobile`, `battery`, `3am`, `cracked`], // extra words that find it in the search
       },
       {
         id: `ashtray`,
@@ -183,6 +187,7 @@ export const copy = {
         note: `Quitting tomorrow. Tomorrow is running late.`,
         colours: [`ash`, `ember`],
         art: `ashtray`,
+        tags: [`smoke`, `smoking`, `cigarette`, `cigarettes`, `ash`, `quit`], // extra words that find it in the search
       },
       {
         id: `glass`,
@@ -196,6 +201,7 @@ export const copy = {
         note: `A unit of measurement, not a promise.`,
         colours: [`amber`, `black`],
         art: `glass`,
+        tags: [`whisky`, `whiskey`, `drink`, `peg`, `pegs`, `rum`, `beer`, `bar`], // extra words that find it in the search
       },
       {
         id: `cab`,
@@ -209,6 +215,7 @@ export const copy = {
         note: `Passenger: someone else. Payer: him.`,
         colours: [`yellow`, `black`],
         art: `cab`,
+        tags: [`taxi`, `uber`, `ola`, `ride`, `car`, `kaali`, `peeli`], // extra words that find it in the search
       },
       {
         id: `voice`,
@@ -223,6 +230,7 @@ export const copy = {
         note: `Admin was still typing. War over.`,
         colours: [`ember`, `black`],
         art: `voice`,
+        tags: [`audio`, `whatsapp`, `group`, `chat`, `war`, `ceasefire`], // extra words that find it in the search
       },
       {
         id: `course`,
@@ -236,6 +244,7 @@ export const copy = {
         note: `Walk-ins welcome. 3 AM preferred.`,
         colours: [`amber`, `yellow`],
         art: `course`,
+        tags: [`course`, `class`, `lesson`, `school`, `problems`, `fix`, `help`, `sorted`], // extra words that find it in the search
       },
     ],
   },
@@ -376,6 +385,97 @@ export const copy = {
     bigB: `{weekday}.`,
     note: `Bring your own lighter.`,
     again: `Light it again`, // starts the whole thing over, from the dark
+  },
+
+  // The rooms. Every scene is a room, numbered in the order they come. The search lists them, and tapping one takes you there.
+  // `line` is the little description under the name in the search. `words` are extra words that find the room.
+  // {objects} is how many things are in the Collection.
+  rooms: [
+    { id: `scene-name`, name: `The Man`, line: `Tap the name. He coughs.`, words: [`name`, `cough`, `hello`, `top`] },
+    { id: `scene-quiz`, name: `The Quiz`, line: `Three questions. One answer, every time.`, words: [`quiz`, `question`, `test`, `answer`] },
+    { id: `scene-collection`, name: `The Collection`, line: `{objects} objects. Collect the ones you know.`, words: [`collection`, `museum`, `collect`, `cards`, `colour`, `color`, `objects`] },
+    { id: `scene-count`, name: `{name} Time`, line: `Hours, cigarettes, pegs. In his units.`, words: [`countdown`, `count`, `clock`, `hours`, `days`, `timer`, `units`] },
+    { id: `scene-rsvp`, name: `Box Office`, line: `Say yes. Get the ticket. Add it to your calendar.`, words: [`rsvp`, `ticket`, `coming`, `yes`, `whatsapp`, `calendar`, `invite`, `stub`] },
+    { id: `scene-print`, name: `The Print Room`, line: `Pick a look. Pick a line. Send it round.`, words: [`poster`, `print`, `share`, `picture`, `image`, `save`, `design`] },
+    { id: `scene-end`, name: `Closing Time`, line: `{weekday}, {time}. Light it again.`, words: [`end`, `closing`, `again`, `bye`, `last`] },
+  ],
+
+  // The search. The magnifier in the top bar opens it. It looks through the objects in the Collection and through the rooms,
+  // and a few questions get a straight answer.
+  //
+  // TO ADD AN ANSWER  copy one { ... } line inside `answers`. `words` is what a guest might type (a whole word, or the start of one).
+  //                   `line` is what comes back. {date} {dateLong} {time} {ends} {place} {name} work in it.
+  // TO MAKE AN OBJECT EASIER TO FIND  add words to its `tags` in collection.objects.
+  archive: {
+    open: `Search the collection`, // the magnifier in the top bar (screen readers)
+    title: `Search the collection`, // the small line at the top of the sheet
+    close: `Close`, // the X (screen readers)
+    inputLabel: `Search`, // screen readers
+    placeholder: `Try "lighter"`,
+    hint: `{objects} objects, {rooms} rooms. Ask anything.`, // before you type
+    suggest: [`lighter`, `3 AM`, `sleep`, `where`], // little buttons under the hint. Tap one to search for it
+    suggestLabel: `Try`, // screen readers, before those buttons
+    count: `{n} records`, // above the results
+    countOne: `1 record`,
+    none: `Nothing under "{q}". Ask {name}, he knows a guy.`,
+    kind: { object: `Acc. no. {accession}`, room: `Room {n}`, extra: `Credits`, answer: `No record` }, // the small label above each result
+    go: `Open`, // screen readers, on a result that takes you somewhere
+    extras: [{ id: `fonts`, name: `Fonts in use`, line: `Three typefaces, and who made them.`, words: [`font`, `fonts`, `typeface`, `type`, `credits`, `colophon`, `designer`] }],
+    answers: [
+      { words: [`sleep`, `nap`, `rest`, `bed`, `tired`], line: `Not held. Last seen in 2019.` },
+      { words: [`money`, `cash`, `pay`, `paid`, `bill`, `wallet`], line: `On loan. Ask who paid for the cab.` },
+      { words: [`gym`, `diet`, `salad`, `fitness`, `healthy`], line: `Pending. Starts tomorrow.` },
+      { words: [`water`, `hydrate`, `juice`, `thirsty`], line: `Out of stock. Check the glass.` },
+      { words: [`sober`, `early`, `leave`, `home`], line: `Nobody leaves before {ends}. Nobody drives home.` },
+      { words: [`gift`, `present`, `cake`, `balloons`, `bring`], line: `Gift: show up. Cake: not held. Lighter: bring your own.` },
+      { words: [`when`, `date`, `day`, `time`], line: `{dateLong}, {time} till {ends}.` },
+      { words: [`where`, `venue`, `place`, `address`, `location`, `map`], line: `Venue: {place}.` },
+      { words: [`dress`, `wear`, `outfit`, `code`], line: `Dress code: what he wore yesterday.` },
+    ],
+  },
+
+  // The credits for the type: "Fonts in use", a link on the last screen. The names are from each font's own project page
+  // (the address is in the comment), so keep them accurate. `rows` are [label, text] pairs, like on the Collection cards.
+  colophon: {
+    link: `Fonts in use`, // the small link on the last screen
+    title: `Fonts in use`,
+    close: `Close`,
+    intro: `Three typefaces. That is the whole wardrobe.`,
+    foot: `All three are open source (SIL Open Font License 1.1) and served from this page.`,
+    fonts: [
+      {
+        family: `League Gothic`,
+        face: `display`, // which of the page's three faces to set the name in: display, serif or mono
+        rows: [
+          [`Designers`, `Caroline Hadilaksono, Micah Rich, Tyler Finck`],
+          [`Foundry`, `The League of Moveable Type`],
+          [`After`, `Alternate Gothic No. 1, Morris Fuller Benton, ATF, 1903`],
+          [`Year`, `2009 to 2011`],
+          [`Used for`, `Every big line. Does not do whispering.`],
+        ], // github.com/theleagueof/league-gothic
+      },
+      {
+        family: `Instrument Serif`,
+        face: `serif`,
+        rows: [
+          [`Designer`, `Rodrigo Fuenzalida`],
+          [`Direction`, `Jordan Egstad, JD Hooge, Jack De Caluwé`],
+          [`Foundry`, `Instrument`],
+          [`Year`, `2022`],
+          [`Used for`, `The jokes. The italic is for the dry ones.`],
+        ], // github.com/Instrument/instrument-serif
+      },
+      {
+        family: `DM Mono`,
+        face: `mono`,
+        rows: [
+          [`Designer`, `Colophon Foundry`],
+          [`Commissioned by`, `DeepMind`],
+          [`Year`, `2020`],
+          [`Used for`, `The small print. Dates, numbers, paperwork.`],
+        ], // github.com/googlefonts/dm-mono
+      },
+    ],
   },
 
   // the message that opens in WhatsApp when someone says Obviously

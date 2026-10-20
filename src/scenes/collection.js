@@ -313,14 +313,15 @@ export function initCollection({ P, T, sfx }) {
       .to(tintEl, { opacity: 0, duration: reduce ? 0.5 : 1.1, ease: 'power2.inOut' }, '+=0.35')
   }
 
-  function applyFilter(next) {
+  function applyFilter(next, { instant = false } = {}) {
     const before = visible()[cur]
     const keep = (s) => !next || s.colours.includes(next)
     // stay on this card if it survives, otherwise go to the first one that does
     const target = before && keep(before) ? before : slides.find(keep)
     if (!target) return
 
-    const state = reduce ? null : Flip.getState(slides.map((s) => s.el))
+    const animate = !reduce && !instant
+    const state = animate ? Flip.getState(slides.map((s) => s.el)) : null
     slides.forEach((s) => (s.el.hidden = !keep(s)))
     filter = next
     const idx = visible().indexOf(target)
@@ -331,7 +332,7 @@ export function initCollection({ P, T, sfx }) {
     setCur(idx)
     paintFilter()
 
-    if (reduce) return
+    if (!animate) return
     freeze(true) // snap is off while the cards slide, or the browser fights the animation
     Flip.from(state, {
       duration: 0.65,
@@ -363,6 +364,17 @@ export function initCollection({ P, T, sfx }) {
     applyFilter(null)
   })
 
+  /* ---------- the search sends you to a card ---------- */
+  // by id. if a colour is hiding that card, the colour comes off first (no animation). it glides there if the guest is already
+  // looking at this scene, otherwise it is already in place by the time the scene scrolls into view.
+  function show(id) {
+    const s = slides.find((x) => x.id === id)
+    if (!s) return
+    touched = true // he asked for a card: he knows they move, so the little peek hint is not needed
+    if (s.el.hidden) applyFilter(null, { instant: true })
+    goTo(visible().indexOf(s), { smooth: inView })
+  }
+
   /* ---------- Shuffle ---------- */
   shuffleBtn.addEventListener('click', () => {
     const n = visible().length
@@ -389,10 +401,13 @@ export function initCollection({ P, T, sfx }) {
   scene.addEventListener('keydown', touch, { capture: true })
   function nudge() {
     if (reduce || touched || cur !== 0 || visible().length < 2) return
+    // a sheet (the search, the credits) is open on top of the cards: nobody is looking, so leave them alone
+    if (document.documentElement.classList.contains('is-sheet')) return
     freeze(true) // snapping is off while it moves
     rail.scrollTo({ left: 36, behavior: 'smooth' })
     setTimeout(() => {
-      if (!touched) rail.scrollTo({ left: 0, behavior: 'smooth' })
+      // bring it back only if nothing else has moved it meanwhile (a finger, the arrows, or the search sending him to a card)
+      if (!touched && cur === 0) rail.scrollTo({ left: 0, behavior: 'smooth' })
       setTimeout(() => freeze(false), 600)
     }, 700)
   }
@@ -412,6 +427,7 @@ export function initCollection({ P, T, sfx }) {
   setCur(0)
 
   return {
+    show,
     // called the first time the scene is on screen
     enter() {
       if (reduce) return

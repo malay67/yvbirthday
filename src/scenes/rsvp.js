@@ -261,15 +261,6 @@ export function initRsvp({ P, T, sparks, sfx }) {
     map.hidden = false
   }
 
-  $('#againBtn').addEventListener('click', () => {
-    const u = new URL(window.location.href)
-    u.searchParams.delete('skip') // light it again means the whole thing, from the dark
-    u.hash = ''
-    window.scrollTo(0, 0)
-    if (u.href === window.location.href) window.location.reload()
-    else window.location.href = u.href
-  })
-
   /* ---------- a little life ---------- */
   gsap.set(wrap, { rotation: -1.4, transformPerspective: 1200 })
   if (fine && !reduce) {

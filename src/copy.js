@@ -240,7 +240,7 @@ export const copy = {
     ],
   },
 
-  // scene 3 (now scene 4): the countdown, in Yuvraj time
+  // scene 4: the countdown, in Yuvraj time
   // perHour = how many of that thing he gets through in an hour. change it and the numbers change.
   count: {
     eyebrow: { to: `{name} time · to go`, late: `{name} time · late by`, over: `{name} time · since last call` },
@@ -268,7 +268,7 @@ export const copy = {
     map: `Open map`, // appears once the party is on, if you added a map link
   },
 
-  // scene 4: the ticket
+  // scene 5: the ticket
   rsvp: {
     admit: `Admit one`,
     no: `No. {ticketNo}`,
@@ -298,7 +298,84 @@ export const copy = {
     calendarFile: `File`,
     calendarFileLabel: `Download the calendar file`,
     map: `Open map`,
-    again: `Light it again`,
+    poster: `Make a poster`, // the small link under the buttons that goes to the Print Room
+  },
+
+  // scene 6 (after the ticket): the Print Room. Pick a style, pick a line, send the poster round.
+  //
+  // TO CHANGE A POSTER LINE  edit `lines`. Keep each one under 40 characters AFTER the {words} are filled in
+  //                          (the box where guests type their own stops at 40 too). {name} {weekday} {time} work here.
+  // TO ADD ONE               add a new line inside the square brackets. More is fine. They come round in a shuffled order.
+  // The three looks (Subway, Swiss, Scan) are drawn in src/scenes/posters.js. `styles` only holds their names.
+  print: {
+    title: `The Print Room`, // the small line above the poster
+    hint: `tap the poster for another line`,
+    styleLabel: `Poster style`, // screen readers, for the three buttons
+    styles: [
+      { id: `subway`, name: `Subway` },
+      { id: `swiss`, name: `Swiss` },
+      { id: `scan`, name: `Scan` },
+    ],
+    meta: `{style} · {n}/{total}`, // top right: which look, which line
+    metaOwn: `{style} · yours`, // the same, once the guest has typed their own line
+    another: `Another line`, // what a screen reader calls the round arrows
+    write: `Write your own`, // the pencil. also the title of the typing sheet
+    share: `Share`,
+    sharing: `Sharing…`, // on the Share button while the phone's share sheet is open
+    posterLabel: `{style} poster. {line}`, // read out by screen readers
+    shareTitle: `{name}'s birthday`, // goes with the picture into WhatsApp, Instagram and the rest
+    shareText: `{name}'s birthday. {date}, {time}.`,
+    fileName: `{name}-birthday-{style}`, // the saved file: yuvraj-birthday-swiss.png (lowercase, no spaces)
+    designedBy: `Designed by {by}`, // printed on the poster, only if the guest adds a name
+
+    sheet: {
+      line: `Your line`,
+      linePlaceholder: `Up to 40 characters`,
+      count: `{n}/{max}`,
+      by: `Designed by`,
+      byPlaceholder: `Your name, optional`,
+      done: `Print it`,
+      cancel: `Cancel`,
+    },
+
+    // if the phone cannot share a picture (some in-app browsers cannot), the poster opens big instead
+    save: {
+      title: `Save your poster`,
+      note: `Press and hold the poster, then save it.`,
+      download: `Download`,
+      close: `Close`,
+    },
+
+    // the lines. the first one is always the first poster, the rest come in a shuffled order.
+    lines: [
+      `Bas ek last.`,
+      `Picks up at 3 AM.`,
+      `Nobody drives home.`,
+      `Admit one. Bring your own lighter.`,
+      `Warning: contains {name}.`,
+      `No filter. Unlike his cigarettes.`,
+      `Last peg. Allegedly.`,
+      `Your problem is now his.`,
+      `Sorted. Ask {name}.`,
+      `Location bhej.`,
+      `Hydrate. Then don't.`,
+      `Cab already booked. By him.`,
+      `Carries everyone. Borrows your lighter.`,
+      `He'll fix it. Then ask for a light.`,
+      `{weekday}, {time}. Show up.`,
+      `Kal se pakka band.`,
+      `Ceasefire by voice note.`,
+      `Ashtray: full. Phone: 4%.`,
+    ],
+  },
+
+  // scene 7: the end card. Closing time.
+  end: {
+    eyebrow: `Closing time`,
+    bigA: `See you`,
+    bigB: `{weekday}.`,
+    note: `Bring your own lighter.`,
+    again: `Light it again`, // starts the whole thing over, from the dark
   },
 
   // the message that opens in WhatsApp when someone says Obviously

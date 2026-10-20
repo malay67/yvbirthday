@@ -80,7 +80,7 @@
     <button class="skip mono" id="skip" type="button" data-copy="intro.skip"></button>
   </section>
 
-  <!-- AFTER THE INTRO: four scenes, one joke and one tap each -->
+  <!-- AFTER THE INTRO: seven scenes, one joke and one tap each -->
   <main id="main" inert>
 
     <!-- 1 · his name -->
@@ -223,7 +223,7 @@
           <nav class="links" aria-label="More">
             <button class="textlink mono" id="calBtn" type="button" data-copy="rsvp.calendar"></button>
             <a class="textlink mono" id="mapLink" target="_blank" rel="noopener" hidden data-copy="rsvp.map"></a>
-            <button class="textlink mono" id="againBtn" type="button" data-copy="rsvp.again"></button>
+            <a class="textlink mono" id="posterLink" href="#scene-print" data-to="#scene-print" data-copy="rsvp.poster"></a>
           </nav>
           <p class="cal-alt mono" id="calAlt" hidden>
             <span data-copy="rsvp.calendarFail"></span>
@@ -233,7 +233,77 @@
         </div>
       </div>
     </section>
+
+    <!-- 6 · the Print Room: pick a look, pick a line, send the poster round. the poster is a canvas, drawn by scenes/print.js -->
+    <section class="scene scene--print" id="scene-print" aria-labelledby="printTitle">
+      <div class="scene__body prt">
+        <header class="prt__head">
+          <h2 class="prt__title mono" id="printTitle" data-copy="print.title"></h2>
+          <p class="prt__meta mono" id="printMeta" aria-hidden="true"></p>
+        </header>
+
+        <div class="prt__stage" id="printStage">
+          <div class="prt__sheet" id="printSheet">
+            <canvas class="prt__canvas" id="posterCanvas" width="1080" height="1350" role="img"></canvas>
+          </div>
+        </div>
+
+        <div class="prt__deck">
+          <p class="prt__hint mono" data-copy="print.hint"></p>
+          <div class="prt__styles" id="printStyles" role="group" data-copy-label="print.styleLabel"></div>
+          <div class="col__ctrl prt__ctrl">
+            <button class="col__nav" id="printAnother" type="button" data-copy-label="print.another"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.5 12A7.5 7.5 0 0 0 6.2 7.2" /><path d="M5 3.6v4.2h4.2" /><path d="M4.5 12a7.5 7.5 0 0 0 13.3 4.8" /><path d="M19 20.4v-4.2h-4.2" /></svg></button>
+            <button class="col__collect prt__share" id="printShare" type="button"><span id="printShareV" data-copy="print.share"></span></button>
+            <button class="col__nav" id="printWrite" type="button" data-copy-label="print.write"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l1.2-4.4L16 4.8a2.1 2.1 0 0 1 3 0l.2.2a2.1 2.1 0 0 1 0 3L8.4 18.8z" /><path d="M14 6.8l3.2 3.2" /></svg></button>
+          </div>
+        </div>
+      </div>
+      <button class="next" type="button" data-copy-label="nav.next"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9l7 7 7-7" /></svg></button>
+    </section>
+
+    <!-- 7 · closing time -->
+    <section class="scene scene--end" id="scene-end" aria-labelledby="endBig">
+      <div class="scene__body end">
+        <p class="eyebrow mono" data-copy="end.eyebrow"></p>
+        <h2 class="end__big" id="endBig"><span data-copy="end.bigA"></span> <span class="end__b" data-copy="end.bigB"></span></h2>
+        <p class="end__note" data-copy="end.note"></p>
+        <button class="btn btn--ghost end__again" id="againBtn" type="button" data-copy="end.again"></button>
+      </div>
+    </section>
   </main>
+
+  <!-- the typing sheet for the Print Room: full screen and fixed, with the fields at the top, so a phone's keyboard never hides them -->
+  <div class="sheet" id="writeSheet" role="dialog" aria-modal="true" aria-labelledby="writeTitle" tabindex="-1" hidden>
+    <form class="sheet__panel" id="writeForm" autocomplete="off">
+      <h2 class="sheet__title mono" id="writeTitle" data-copy="print.write"></h2>
+      <label class="field">
+        <span class="field__k mono" data-copy="print.sheet.line"></span>
+        <input class="field__in field__in--big" id="writeLine" type="text" maxlength="40" autocomplete="off" autocapitalize="sentences" autocorrect="off" spellcheck="false" enterkeyhint="done" />
+        <span class="field__n mono" id="writeCount"></span>
+      </label>
+      <label class="field">
+        <span class="field__k mono" data-copy="print.sheet.by"></span>
+        <input class="field__in" id="writeBy" type="text" maxlength="24" autocomplete="off" autocapitalize="words" autocorrect="off" spellcheck="false" enterkeyhint="done" />
+      </label>
+      <div class="sheet__row">
+        <button class="btn btn--line" id="writeCancel" type="button" data-copy="print.sheet.cancel"></button>
+        <button class="btn btn--solid" id="writeDone" type="submit" data-copy="print.sheet.done"></button>
+      </div>
+    </form>
+  </div>
+
+  <!-- if the phone cannot share a picture, the poster opens here, big, to press and hold or download -->
+  <div class="sheet sheet--save" id="saveSheet" role="dialog" aria-modal="true" aria-labelledby="saveTitle" tabindex="-1" hidden>
+    <div class="sheet__panel">
+      <h2 class="sheet__title mono" id="saveTitle" data-copy="print.save.title"></h2>
+      <div class="save__pic"><img id="saveImg" alt="" /></div>
+      <p class="save__note mono" data-copy="print.save.note"></p>
+      <div class="sheet__row">
+        <button class="btn btn--line" id="saveClose" type="button" data-copy="print.save.close"></button>
+        <a class="btn btn--solid" id="saveDownload" download="poster.png" data-copy="print.save.download"></a>
+      </div>
+    </div>
+  </div>
 
   <!-- the small white line at the bottom, like before a film -->
   <p class="disclaimer" id="disclaimer" aria-live="polite"></p>

@@ -3,6 +3,8 @@ import { initQuiz } from './quiz.js'
 import { initCollection } from './collection.js'
 import { initCount } from './count.js'
 import { initRsvp } from './rsvp.js'
+import { initPrint } from './print.js'
+import { initEnd } from './end.js'
 
 const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 const $ = (s, r = document) => r.querySelector(s)
@@ -45,6 +47,8 @@ export function initScenes({ P, T, smoke, sparks, sfx, clock, extras = [] }) {
   const collection = initCollection({ P, T, sfx })
   const count = initCount({ P, T, clock, sfx })
   const rsvp = initRsvp({ P, T, sparks, sfx })
+  const print = initPrint({ P, T, sfx })
+  const end = initEnd()
 
   const enter = {
     'scene-quiz': () => quiz.enter(),
@@ -54,6 +58,8 @@ export function initScenes({ P, T, smoke, sparks, sfx, clock, extras = [] }) {
       setTimeout(() => ready('#scene-count'), 4500)
     },
     'scene-rsvp': () => rsvp.enter(),
+    'scene-print': () => print.enter(),
+    'scene-end': () => end.enter(),
   }
   const io = new IntersectionObserver(
     (entries) => {
@@ -77,6 +83,8 @@ export function initScenes({ P, T, smoke, sparks, sfx, clock, extras = [] }) {
     'scene-collection': { top: 0.9, x: 0.5, y: 1.05, r: 0.92, lift: 0.2 }, // the collection: a gallery light, straight on
     'scene-count': { top: 0.8, x: 0.8, y: 1.0, r: 0.9, lift: 0.18 }, // the countdown
     'scene-rsvp': { top: 1, x: 0.5, y: -0.1, r: 1.0, lift: 0.26 }, // the ticket: warm, from below
+    'scene-print': { top: 0.85, x: 0.3, y: 1.0, r: 0.9, lift: 0.22 }, // the print room: a work light, off to one side
+    'scene-end': { top: 0.55, x: 0.5, y: 1.05, r: 0.8, lift: 0.12 }, // closing time: the lights going down
   }
   const fallbackMood = moods['scene-rsvp']
   let anchors = []

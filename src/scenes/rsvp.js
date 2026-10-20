@@ -1,6 +1,7 @@
 import { gsap } from 'gsap'
 import { copy } from '../copy.js'
 import { fill, whatsappUrl, whatsappMessage, googleCalUrl, calendarParts } from '../lib/party.js'
+import { collected, collectedLine } from '../lib/collected.js'
 import { buzz } from '../fx/haptics.js'
 import { goTo } from '../lib/open.js'
 
@@ -46,9 +47,27 @@ export function initRsvp({ P, T, sparks, sfx }) {
   barcode($('#barcode'), P.party.y * 10000 + P.party.m * 100 + P.party.d)
   $('#ticket').setAttribute('aria-label', `${fill(copy.rsvp.title, T)}. ${fill(copy.rsvp.dateVal, T)}, ${fill(copy.rsvp.timeVal, T)}, ${fill(copy.rsvp.placeVal, T)}`)
 
+  /* ---------- the punch card on the stub: one hole per thing collected ---------- */
+  const holes = $('#punchHoles')
+  const punchN = $('#punchN')
+  const ids = copy.collection.objects.map((o) => o.id)
+  ids.forEach(() => holes.append(document.createElement('i')))
+  const paintPunch = () => {
+    Array.from(holes.children).forEach((h, i) => h.classList.toggle('is-on', collected.has(ids[i])))
+    punchN.textContent = fill(copy.collection.stubCount, { n: collected.count(), total: collected.total() })
+  }
+  paintPunch()
+  collected.subscribe(paintPunch)
+
   /* ---------- WhatsApp ---------- */
-  const waUrl = whatsappUrl(P, whatsappMessage(P, copy))
-  waLink.href = waUrl
+  // the message is rebuilt whenever the collection changes, so it can carry one extra line: what he collected
+  let waUrl = ''
+  const buildWa = () => {
+    waUrl = whatsappUrl(P, whatsappMessage(P, copy, collectedLine(T)))
+    waLink.href = waUrl
+  }
+  buildWa()
+  collected.subscribe(buildWa)
 
   // a new tab keeps this page alive. if the phone refuses, go in this tab instead.
   const openWhatsApp = () => goTo(waUrl)

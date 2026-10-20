@@ -12,6 +12,8 @@
 
   <!-- the room: smoke, flame, light. one WebGL canvas, fixed behind everything -->
   <canvas id="smoke" aria-hidden="true"></canvas>
+  <!-- a colour the room takes on for a moment when you pick a swatch in the Collection. sits between the smoke and the scenes -->
+  <div class="tint" id="tint" aria-hidden="true"></div>
 
   <header class="bar" id="bar">
     <p class="bar__mark mono">
@@ -117,7 +119,43 @@
       <button class="next" type="button" data-copy-label="nav.next"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9l7 7 7-7" /></svg></button>
     </section>
 
-    <!-- 3 · the countdown, in his time -->
+    <!-- 3 · the Yuvraj Collection: the museum after hours. cards, buttons and colour squares are built by scenes/collection.js from copy.js -->
+    <section class="scene scene--col" id="scene-collection" aria-labelledby="colTitle">
+      <div class="scene__body col">
+        <header class="col__head">
+          <div class="col__lede">
+            <h2 class="col__title mono" id="colTitle" data-copy="collection.title"></h2>
+            <button class="col__reset mono" id="colReset" type="button" hidden>
+              <span class="col__resetName" id="colResetName"></span>
+              <span class="col__resetAct" data-copy="collection.showAll"></span>
+            </button>
+          </div>
+          <p class="col__count mono" id="colCount" aria-hidden="true"></p>
+          <button class="col__icon" id="colShuffle" type="button" data-copy-label="collection.shuffle">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h3.2c3.4 0 5 2.2 6.8 5s3.4 5 6.8 5H21" /><path d="M18 13l3 3-3 3" /><path d="M3 18h3.2c1.7 0 3-.6 4-1.6" /><path d="M13.6 8.1C14.7 6.8 16.1 6 18.2 6H21" /><path d="M18 3l3 3-3 3" /></svg>
+          </button>
+        </header>
+
+        <div class="col__rail" id="colRail" tabindex="0" role="region" aria-roledescription="carousel"></div>
+
+        <div class="col__deck">
+        <div class="col__ctrl">
+          <button class="col__nav" id="colPrev" type="button" aria-disabled="true" data-copy-label="collection.prev"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg></button>
+          <button class="col__collect" id="colCollect" type="button" aria-pressed="false">
+            <span class="col__collectV" id="colCollectV"></span>
+            <span class="col__collectN mono" id="colCollectN"></span>
+          </button>
+          <button class="col__nav" id="colNext" type="button" data-copy-label="collection.next"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg></button>
+        </div>
+
+        <div class="col__chips" id="colChips" role="group"></div>
+        <p class="sr-only" id="colStatus" aria-live="polite"></p>
+        </div>
+      </div>
+      <button class="next" type="button" data-copy-label="nav.next"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9l7 7 7-7" /></svg></button>
+    </section>
+
+    <!-- 4 · the countdown, in his time -->
     <section class="scene scene--count" id="scene-count" aria-labelledby="countEyebrow">
       <div class="scene__body">
         <p class="eyebrow mono" id="countEyebrow"></p>
@@ -151,6 +189,11 @@
             <div class="ticket__stub" aria-hidden="true">
               <p class="ticket__stubTop mono" data-copy="rsvp.stub"></p>
               <div class="barcode" id="barcode"></div>
+              <!-- a little punch card: one hole for each thing he collected in the Collection -->
+              <div class="punch">
+                <div class="punch__holes" id="punchHoles"></div>
+                <p class="punch__n mono" id="punchN"></p>
+              </div>
               <p class="ticket__stubBot mono" data-copy="rsvp.stampBottom"></p>
             </div>
           </article>

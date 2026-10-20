@@ -23,6 +23,9 @@
      {dots}                    the date as dd.mm.yy
      {place}                   the venue, or "Pin on WhatsApp" if none yet
      {age}                     his age (only if you set one)
+     {birthday}                the day he was born, like "11 October" (the year shows only if you set an age)
+     {partyDay}                the party day in full, like "Monday 12 October"
+     {accession}               an Acc. no. built from his birthday, like 2026.10.11.001 (used on the Collection cards)
      {tonight}                 Tonight (or Today for a daytime party)
      {dayJoke}                 the day-of-the-week joke. It switches itself to
                                the weekend version when the party is on one.
@@ -90,7 +93,154 @@ export const copy = {
     ],
   },
 
-  // scene 3: the countdown, in Yuvraj time
+  // scene 3: the Yuvraj Collection. The museum after hours, open one night only.
+  // One object per card. Swipe, or use the arrows. "Collect" punches a hole in the card.
+  //
+  // TO CHANGE AN OBJECT  edit its lines inside `objects`.
+  // TO ADD ONE           copy a whole { ... } block, give it a new `id` (any lowercase word nobody used yet),
+  //                      and pick 2 or 3 colour ids from `swatches`.
+  // Acc. no. (the accession number) is made from his birthday and the card's place in the list, so you never type it.
+  // In `rows`, each pair is [label, text]. Keep it to two or three short rows.
+  // `short` is the little name used in the WhatsApp message ("Collected: the lighter (not his), ...").
+  // `art` is the name of the drawing (they live in src/scenes/collection-art.js).
+  collection: {
+    title: `The {name} Collection`, // the small line above the cards
+    acc: `Acc. no. {accession}`, // top of every card. the number is worked out for you
+    prev: `Previous object`, // what a screen reader calls the arrows
+    next: `Next object`,
+    collect: `Collect`, // the big button
+    uncollect: `Put back`, // the same button, once that object is collected
+    stamp: `Collected`, // the red stamp on a collected card
+    punchCount: `{n} / {total}`, // on the big button: how many he has
+    shuffle: `Shuffle`, // screen readers only, the button is a drawing of two arrows
+    showAll: `Show all`, // puts every card back after you pick a colour
+    byColour: `by colour`, // beside the five colour squares
+    colourLabel: `Explore by colour`, // screen readers
+    colourPicked: `{colour} {hex}`, // replaces the title while a colour is picked
+    slide: `{title}, {n} of {total}`, // screen readers, when the card changes
+    stubCount: `{n}/{total}`, // on the ticket stub, under the little punch card
+
+    // five colours. the hex codes are real: they paint the squares and tint the room.
+    swatches: [
+      { id: `amber`, name: `Last Peg Amber`, hex: `#E9A23B` },
+      { id: `black`, name: `3 AM Black`, hex: `#0A0807` },
+      { id: `ash`, name: `Ash`, hex: `#A39A8D` },
+      { id: `ember`, name: `Ember`, hex: `#FF6A2B` },
+      { id: `yellow`, name: `Kaali-Peeli Yellow`, hex: `#F4C20D` },
+    ],
+
+    // card 1 is the wall label for the man himself. then the things from his life.
+    objects: [
+      {
+        id: `man`,
+        short: `the man himself`,
+        title: `{name}`,
+        sub: `Indian, b. {birthday}`,
+        rows: [
+          [`Medium`, `Human; smoke, whisky, loyalty`],
+          [`Credit line`, `Gift of his parents`],
+          [`Condition`, `Good, considering`],
+        ],
+        note: `On view {partyDay}, {time}. Do not touch the lighter.`,
+        colours: [`ash`, `amber`, `black`],
+        art: `man`,
+      },
+      {
+        id: `lighter`,
+        short: `the lighter (not his)`,
+        title: `Lighter (not his)`,
+        sub: ``,
+        rows: [
+          [`Medium`, `Plastic, butane, borrowed`],
+          [`Credit line`, `Involuntary gift of at least four friends`],
+        ],
+        note: `He has four. Still asks for yours.`,
+        colours: [`ember`, `yellow`],
+        art: `lighter`,
+      },
+      {
+        id: `phone`,
+        short: `the 3 AM phone`,
+        title: `Phone, cracked`,
+        sub: ``,
+        rows: [
+          [`Medium`, `Glass, aluminium, no case`],
+          [`Condition`, `Cracked, still picks up at 3 AM`],
+        ],
+        note: `Battery 4%. Answered anyway.`,
+        colours: [`black`, `ash`],
+        art: `phone`,
+      },
+      {
+        id: `ashtray`,
+        short: `the ashtray`,
+        title: `Ashtray`,
+        sub: ``,
+        rows: [
+          [`Medium`, `Glass, ash, good intentions`],
+          [`Condition`, `Full`],
+        ],
+        note: `Quitting tomorrow. Tomorrow is running late.`,
+        colours: [`ash`, `ember`],
+        art: `ashtray`,
+      },
+      {
+        id: `glass`,
+        short: `bas ek last`,
+        title: `Glass`,
+        sub: `"Bas ek last"`,
+        rows: [
+          [`Dimensions`, `60 ml, repeating`],
+          [`Medium`, `Whisky, neat, again`],
+        ],
+        note: `A unit of measurement, not a promise.`,
+        colours: [`amber`, `black`],
+        art: `glass`,
+      },
+      {
+        id: `cab`,
+        short: `the cab receipt`,
+        title: `Cab receipt`,
+        sub: ``,
+        rows: [
+          [`Medium`, `Thermal paper, crumpled`],
+          [`Provenance`, `Booked for someone else. Again.`],
+        ],
+        note: `Passenger: someone else. Payer: him.`,
+        colours: [`yellow`, `black`],
+        art: `cab`,
+      },
+      {
+        id: `voice`,
+        short: `the 0:47 voice note`,
+        title: `Voice note, 0:47`,
+        sub: ``,
+        rows: [
+          [`Medium`, `Audio, 0:47`],
+          [`Provenance`, `Group chat, 200 unread`],
+          [`Condition`, `Ended a war`],
+        ],
+        note: `Admin was still typing. War over.`,
+        colours: [`ember`, `black`],
+        art: `voice`,
+      },
+      {
+        id: `course`,
+        short: `YUV 101`,
+        title: `YUV 101`,
+        sub: `Fixing Other People's Problems`,
+        rows: [
+          [`Prerequisite`, `A dead car`],
+          [`Meets`, `{partyDay}, {time} till late`],
+        ],
+        note: `Walk-ins welcome. 3 AM preferred.`,
+        colours: [`amber`, `yellow`],
+        art: `course`,
+      },
+    ],
+  },
+
+  // scene 3 (now scene 4): the countdown, in Yuvraj time
   // perHour = how many of that thing he gets through in an hour. change it and the numbers change.
   count: {
     eyebrow: { to: `{name} time · to go`, late: `{name} time · late by`, over: `{name} time · since last call` },
@@ -155,6 +305,9 @@ export const copy = {
   whatsapp: {
     withPlace: `I'm in. {name}'s birthday, {date}, {time}, {place}. Obviously.`,
     noPlace: `I'm in. {name}'s birthday, {date}, {time}. Obviously. Location bhej.`, // used until you add a venue
+    // one extra line, only if the guest collected something in the Collection. at most three names, then "+N more".
+    collected: `Collected: {list}.`,
+    more: `+{n} more`,
   },
 
   // the "add to calendar" entry

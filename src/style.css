@@ -238,7 +238,13 @@ html{scroll-snap-type:y mandatory}
 .ticket__meta dt{font-size:10px;opacity:.55}
 .ticket__meta dd{margin:0;font-size:12.5px;letter-spacing:.08em;text-transform:uppercase}
 .ticket__fine{font-family:var(--f-mono);font-size:11.5px;line-height:1.4;letter-spacing:.015em;opacity:.8;padding-top:8px;border-top:1px solid rgba(20,16,13,.22)}
-.ticket__stub{display:grid;grid-template-rows:auto minmax(0,1fr) auto;justify-items:center;gap:8px;padding:12px 8px}
+.ticket__stub{display:grid;grid-template-rows:auto minmax(0,1fr) auto auto;justify-items:center;gap:8px;padding:12px 8px}
+/* the punch card on the stub: one hole for each thing collected in the Collection */
+.punch{display:grid;justify-items:center;gap:4px}
+.punch__holes{display:grid;grid-template-columns:repeat(4,8px);gap:4px}
+.punch__holes i{display:block;width:8px;height:8px;border-radius:50%;border:1.2px solid rgba(20,16,13,.42)}
+.punch__holes i.is-on{background:#17110d;border-color:#17110d;box-shadow:inset 0 1px 1px rgba(255,255,255,.14)}
+.punch__n{font-size:10px;letter-spacing:.08em;opacity:.75}
 .ticket__stubTop,.ticket__stubBot{opacity:.7;font-size:10px;letter-spacing:.1em}
 /* the bars fill whatever height the ticket has. they must not ask for height themselves, or a wide stub makes a very tall ticket */
 .barcode{position:relative;width:100%;min-height:0}
@@ -405,4 +411,169 @@ html.no-gl body{background:radial-gradient(90% 70% at 50% 0%,#2b1e11,#0a0807 72%
 @media (prefers-reduced-motion:reduce){
   .grain,.eq i,.next.is-ready,.cig__ember,.cig__wisp{animation:none}
   html{scroll-behavior:auto}
+}
+
+/* ============================================================
+   THE YUVRAJ COLLECTION: the museum after hours
+   Bone paper under the light, the same paper as the ticket.
+   Hairline rules, mono metadata, League Gothic titles, serif italic notes.
+   ============================================================ */
+:root{
+  --stamp:#b8281a; /* the red ink of the IN stamp */
+  --paper-tex:linear-gradient(180deg,rgba(255,255,255,.34),rgba(255,255,255,0) 34%,rgba(60,40,10,.08)),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .2 0 0 0 0 .14 0 0 0 0 .06 0 0 0 .55 -.12'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E");
+}
+.sr-only{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+/* the colour the room takes on when you pick a swatch. between the smoke (0) and the scenes (5) */
+.tint{position:fixed;inset:0;z-index:4;pointer-events:none;opacity:0}
+
+/* the scene fills the screen: header, cards (they take whatever is left), buttons, colour squares */
+.scene--col{padding-bottom:calc(var(--sa-b) + 92px)}
+.scene--col .scene__body{flex:1 1 auto;margin:0 auto;max-width:520px;grid-template-rows:auto minmax(0,1fr) auto auto;gap:8px}
+
+.col__head{position:relative;z-index:2;display:grid;grid-template-columns:minmax(0,1fr) auto 48px;align-items:center;column-gap:6px;min-height:48px}
+.col__lede{display:grid;align-items:center;min-width:0}
+.col__title,.col__reset{grid-area:1/1;min-width:0}
+.col__title{margin:0;max-width:12.5em;color:var(--ink-2);font-size:12.5px;line-height:1.35}
+.col__reset{display:grid;align-content:center;justify-items:start;gap:1px;min-height:48px;text-align:left;-webkit-tap-highlight-color:transparent}
+.col__resetName{color:var(--amber-hi);font-size:12.5px;line-height:1.3}
+.col__resetAct{color:var(--ink-2);font-size:12px;line-height:1.3;text-decoration:underline;text-decoration-color:rgba(236,227,211,.3);text-underline-offset:5px}
+.col__count{margin:0;color:var(--ink);font-size:13px;letter-spacing:.1em;white-space:nowrap;font-variant-numeric:tabular-nums}
+.col__icon{display:grid;place-items:center;width:48px;height:48px;margin-right:-8px;color:var(--ink);-webkit-tap-highlight-color:transparent}
+.col__icon svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+
+/* the rail: native sideways scroll-snap. it only scrolls on x, so a vertical swipe that starts on a card still moves the page */
+.col__rail{position:relative;display:flex;margin:0 -8px;padding:2px 0 10px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.col__rail::-webkit-scrollbar{display:none}
+.col__rail.is-free{scroll-snap-type:none}
+.col__rail:focus-visible{outline-offset:-3px}
+.obj{--hx:23px;--hy:23px;display:flex;flex:0 0 100%;min-width:0;padding:0 8px;scroll-snap-align:center;scroll-snap-stop:always}
+.obj__wrap{position:relative;display:flex;flex:1;min-width:0;filter:drop-shadow(0 12px 12px rgba(0,0,0,.55)) drop-shadow(0 2px 4px rgba(0,0,0,.5))}
+
+/* the card: bone paper. collected means a real hole (a mask) and a red stamp */
+.obj__paper{
+  --hole:0px;
+  position:relative;display:flex;flex:1;flex-direction:column;justify-content:space-between;gap:10px;min-width:0;padding:14px;
+  color:var(--paper-ink);background:var(--paper-tex),var(--paper);
+}
+.obj.is-collected .obj__paper{
+  --hole:8px;
+  -webkit-mask:radial-gradient(circle var(--hole) at var(--hx) var(--hy),#0000 96%,#000 100%);
+          mask:radial-gradient(circle var(--hole) at var(--hx) var(--hy),#0000 96%,#000 100%);
+}
+.obj__top{position:relative;display:flex;align-items:center;min-height:20px;padding-left:24px}
+/* where the punch will land */
+.obj__top::before{content:"";position:absolute;left:1px;top:1px;width:16px;height:16px;border:1.5px dashed rgba(20,16,13,.34);border-radius:50%}
+.obj.is-collected .obj__top::before{opacity:0}
+.obj__acc{font-size:12px;line-height:1.3;letter-spacing:.1em;white-space:nowrap;opacity:.78}
+.obj__stamp{position:absolute;left:2px;bottom:2px;padding:3px 8px 2px;border:2px solid var(--stamp);color:var(--stamp);font-family:var(--f-mono);font-size:12px;line-height:1.3;letter-spacing:.2em;text-transform:uppercase;opacity:0;transform:rotate(-6deg);mix-blend-mode:multiply;filter:url(#ink);pointer-events:none}
+.obj.is-collected .obj__stamp{opacity:.92}
+/* the little disc of paper that falls out when you punch */
+.obj__chad{position:absolute;left:calc(var(--hx) - 8px);top:calc(var(--hy) - 8px);width:16px;height:16px;border-radius:50%;background:var(--paper);border:1px solid rgba(20,16,13,.25);opacity:0;pointer-events:none}
+
+.obj__head{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:10px;align-items:start}
+.obj__titles{display:grid;gap:5px;align-content:start;min-width:0}
+.obj__title{font-family:var(--f-display);font-weight:400;text-transform:uppercase;font-size:clamp(34px,6svh,54px);line-height:.88;letter-spacing:.005em;text-wrap:balance;overflow-wrap:anywhere}
+.obj__sub{font-family:var(--f-serif);font-style:italic;font-size:clamp(17px,2.7svh,22px);line-height:1.1;opacity:.85}
+.obj__plate{display:grid;justify-items:center;gap:7px}
+.obj__art{display:block;width:clamp(56px,9.6svh,96px);height:auto;aspect-ratio:1;color:var(--paper-ink)}
+.obj__art .acc{stroke:var(--stamp)}
+.obj__hues{display:flex;gap:5px}
+.obj__hues li{position:relative;width:12px;height:12px;background:var(--c);border:1px solid rgba(20,16,13,.6)}
+.obj__hues li.is-hit{outline:2px solid var(--paper-ink);outline-offset:1px}
+
+.obj__meta{margin:0;border-top:1px solid rgba(20,16,13,.32);font-family:var(--f-mono);font-size:clamp(12.5px,1.95svh,16px);line-height:1.45;letter-spacing:.01em}
+.obj__meta>div{padding:5px 0;border-bottom:1px solid rgba(20,16,13,.18);text-wrap:pretty}
+.obj__meta dt{display:inline;margin-right:.7em;font-size:.78em;letter-spacing:.12em;text-transform:uppercase;opacity:.6}
+.obj__meta dd{display:inline;margin:0;overflow-wrap:anywhere}
+.obj__note{margin-top:8px;font-family:var(--f-serif);font-style:italic;font-size:clamp(18px,3.1svh,25px);line-height:1.12;color:#2a1d12;text-wrap:pretty}
+
+/* prev, Collect, next */
+.col__ctrl{display:grid;grid-template-columns:48px minmax(0,1fr) 48px;gap:8px}
+.col__nav{display:grid;place-items:center;min-height:52px;border:1px solid rgba(236,227,211,.4);background:rgba(10,8,7,.42);color:var(--ink);-webkit-tap-highlight-color:transparent;transition:background .25s,border-color .25s,opacity .25s}
+.col__nav svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.col__nav[aria-disabled="true"]{opacity:.3}
+.col__nav:active{background:rgba(233,162,59,.2);border-color:var(--amber)}
+.col__collect{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:52px;padding:0 16px;background:var(--amber);border:1px solid var(--amber);color:#150d05;font-family:var(--f-mono);font-size:14px;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap;-webkit-tap-highlight-color:transparent;transition:background .25s,color .25s}
+.col__collect:active{background:var(--amber-hi)}
+.col__collect[aria-pressed="true"]{background:transparent;color:var(--amber-hi)}
+.col__collectN{padding-left:10px;border-left:1px solid currentColor;font-size:12px;letter-spacing:.08em;opacity:.75;font-variant-numeric:tabular-nums}
+
+/* five colour squares: a label, then the squares (each a 48px tap target) */
+.col__chips{display:grid;grid-template-columns:minmax(0,1fr) repeat(5,48px);align-items:center}
+.col__chipsLabel{padding-right:6px;font-family:var(--f-serif);font-style:italic;font-size:17px;line-height:1;color:var(--ink-2)}
+.chip{display:grid;place-items:center;width:48px;min-height:48px;-webkit-tap-highlight-color:transparent}
+.chip i{display:block;width:28px;height:28px;background:var(--c);border:1px solid rgba(236,227,211,.55);transition:transform .25s var(--ease),box-shadow .25s,opacity .25s}
+.chip[aria-pressed="true"] i{transform:scale(1.1);box-shadow:0 0 0 2px var(--bg),0 0 0 3.5px var(--ink)}
+.col__chips.is-on .chip[aria-pressed="false"] i{opacity:.38}
+
+@media (hover:hover) and (pointer:fine){
+  .col__nav:hover{border-color:var(--amber);background:rgba(233,162,59,.12)}
+  .col__collect:hover{background:var(--amber-hi)}
+  .col__collect[aria-pressed="true"]:hover{background:rgba(233,162,59,.14)}
+  .chip:hover i{transform:scale(1.08)}
+  .col__reset:hover .col__resetAct,.col__icon:hover{color:var(--amber-hi)}
+}
+
+/* tall phones have room to spare: a bigger drawing */
+@media (min-height:760px) and (max-width:759px){
+  .obj__art{width:clamp(80px,min(12.5svh,30vw),124px)}
+}
+
+/* narrow or short phones: tighten a little so the tallest card (his wall label) still fits one screen */
+@media (max-width:340px),(max-height:620px){
+  .scene--col .scene__body{gap:6px}
+  .obj{--hx:21px;--hy:21px}
+  .obj__paper{padding:12px;gap:8px}
+  .obj__top{padding-left:22px}
+  .obj__art{width:clamp(50px,8.4svh,96px)}
+  .obj__meta{font-size:clamp(12px,1.85svh,15px)}
+  .obj__meta>div{padding:4px 0}
+  .obj__note{margin-top:6px;font-size:clamp(17px,2.9svh,25px)}
+}
+
+.col__deck{display:contents}
+
+/* big screens: the card is a wide label in two columns, and the whole stack sits in the middle of the screen */
+@media (min-width:760px){
+  .scene--col{padding-bottom:calc(var(--sa-b) + 96px)}
+  .scene--col .scene__body{flex:0 1 auto;margin:auto;max-width:780px;grid-template-rows:auto auto auto auto;gap:14px}
+  .col__title{max-width:none}
+  .col__rail{padding:2px 0 14px}
+  .obj{--hx:37px;--hy:33px}
+  .obj__paper{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.12fr);grid-template-areas:"top top" "head body";align-content:start;gap:16px 34px;padding:24px 28px}
+  .obj__top{grid-area:top}
+  .obj__head{grid-area:head}
+  .obj__body{grid-area:body;align-self:center}
+  .obj__title{font-size:62px}
+  .obj__sub{font-size:24px}
+  .obj__art{width:116px}
+  .obj__hues li{width:14px;height:14px}
+  .obj__meta{font-size:15px}
+  .obj__note{margin-top:10px;font-size:26px}
+  .obj__acc{font-size:12.5px}
+  .obj__stamp{font-size:13px}
+}
+
+/* a phone on its side: the card on the left, the buttons on the right */
+@media (max-height:520px) and (orientation:landscape){
+  .scene--col{padding-bottom:calc(var(--sa-b) + 58px)}
+  .scene--col .scene__body{flex:1 1 auto;margin:0 auto;max-width:none;grid-template-columns:minmax(0,1fr) 288px;grid-template-rows:auto minmax(0,1fr);column-gap:22px;row-gap:2px}
+  .col__head{grid-column:1;grid-row:1;min-height:44px}
+  .col__rail{grid-column:1;grid-row:2;padding-bottom:8px}
+  .col__deck{display:grid;grid-column:2;grid-row:1 / span 2;align-content:center;gap:10px}
+  .col__chips{grid-template-columns:repeat(5,48px)}
+  .col__chipsLabel{grid-column:1 / -1;padding:0 0 2px}
+  /* the arrow goes under the right-hand column, out of the card's way */
+  .scene--col .next{left:auto;right:calc(max(var(--pad),var(--sa-r)) + 116px);margin-left:0}
+  .obj{--hx:19px;--hy:19px}
+  .obj__paper{grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);align-content:space-between;gap:8px 22px;padding:10px 14px}
+  .obj__top{padding-left:22px}
+  .obj__title{font-size:clamp(30px,10svh,44px)}
+  .obj__sub{font-size:16px}
+  .obj__art{width:clamp(46px,13.5svh,70px)}
+  .obj__hues li{width:12px;height:12px}
+  .obj__meta{font-size:12px}
+  .obj__meta>div{padding:3px 0}
+  .obj__note{margin-top:6px;font-size:17px}
+  .obj__stamp{font-size:11px}
 }

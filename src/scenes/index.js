@@ -1,5 +1,6 @@
 import { initName } from './name.js'
 import { initQuiz } from './quiz.js'
+import { initCollection } from './collection.js'
 import { initCount } from './count.js'
 import { initRsvp } from './rsvp.js'
 
@@ -8,7 +9,7 @@ const $ = (s, r = document) => r.querySelector(s)
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v))
 
 /*
-  Everything that lives after the intro: four scenes on native scroll-snap.
+  Everything that lives after the intro: the scenes, on native scroll-snap.
   Native scrolling is deliberate. It is the smoothest thing a phone can do, and it behaves
   inside the WhatsApp and Instagram browsers, where scroll-hijacking libraries do not.
 */
@@ -38,14 +39,16 @@ export function initScenes({ P, T, smoke, sparks, sfx, clock, extras = [] }) {
   })
   const ready = (id) => $('.next', $(id))?.classList.add('is-ready')
 
-  /* ---- the four scenes ---- */
+  /* ---- the scenes ---- */
   initName({ T, sparks, sfx })
   const quiz = initQuiz({ T, sfx, onDone: () => ready('#scene-quiz') })
+  const collection = initCollection({ P, T, sfx })
   const count = initCount({ P, T, clock, sfx })
   const rsvp = initRsvp({ P, T, sparks, sfx })
 
   const enter = {
     'scene-quiz': () => quiz.enter(),
+    'scene-collection': () => collection.enter(),
     'scene-count': () => {
       count.enter()
       setTimeout(() => ready('#scene-count'), 4500)
@@ -67,15 +70,18 @@ export function initScenes({ P, T, smoke, sparks, sfx, clock, extras = [] }) {
   scenes.forEach((s) => io.observe(s))
 
   /* ---- the light moves with you ---- */
-  const moods = [
-    { top: 1, x: 0.5, y: 1.1, r: 0.95, lift: 0.2 }, // his name: light from above
-    { top: 0.75, x: 0.22, y: 1.0, r: 0.85, lift: 0.15 }, // the quiz: dimmer, off to the side
-    { top: 0.8, x: 0.8, y: 1.0, r: 0.9, lift: 0.18 }, // the countdown
-    { top: 1, x: 0.5, y: -0.1, r: 1.0, lift: 0.26 }, // the ticket: warm, from below
-  ]
+  // one mood per scene, by id, so adding a scene never shifts the others
+  const moods = {
+    'scene-name': { top: 1, x: 0.5, y: 1.1, r: 0.95, lift: 0.2 }, // his name: light from above
+    'scene-quiz': { top: 0.75, x: 0.22, y: 1.0, r: 0.85, lift: 0.15 }, // the quiz: dimmer, off to the side
+    'scene-collection': { top: 0.9, x: 0.5, y: 1.05, r: 0.92, lift: 0.2 }, // the collection: a gallery light, straight on
+    'scene-count': { top: 0.8, x: 0.8, y: 1.0, r: 0.9, lift: 0.18 }, // the countdown
+    'scene-rsvp': { top: 1, x: 0.5, y: -0.1, r: 1.0, lift: 0.26 }, // the ticket: warm, from below
+  }
+  const fallbackMood = moods['scene-rsvp']
   let anchors = []
   const measure = () => {
-    anchors = scenes.map((s, i) => ({ c: s.offsetTop + s.offsetHeight / 2, m: moods[Math.min(i, moods.length - 1)] }))
+    anchors = scenes.map((s) => ({ c: s.offsetTop + s.offsetHeight / 2, m: moods[s.id] || fallbackMood }))
   }
   const mood = (dt) => {
     if (!anchors.length) return

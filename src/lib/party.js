@@ -186,6 +186,12 @@ export function fill(s, t) {
   return String(s).replace(/\{(\w+)\}/g, (m, k) => (k in t ? t[k] : m))
 }
 
+// an accession number, built from his birthday: 2026.10.11.003 (year.month.day.number)
+export function accession(P, n) {
+  const b = P.birthday
+  return `${b.y}.${b.mm}.${b.dd}.${String(n).padStart(3, '0')}`
+}
+
 // everything a line in copy.js can ask for, e.g. {weekday} {time} {name}
 export function tokens(P, copy) {
   const p = P.party
@@ -202,6 +208,10 @@ export function tokens(P, copy) {
     year: p.y,
     date: `${p.weekdayShort} ${p.d} ${p.monthShort}`,
     dateLong: `${p.weekday} ${p.d} ${p.month}`,
+    partyDay: `${p.weekday} ${p.d} ${p.month}`,
+    // the day he was born. the year is only added if you set an age in party.config.js (the birthday there is this year's)
+    birthday: P.age == null ? `${b.d} ${b.month}` : `${b.d} ${b.month} ${b.y - P.age}`,
+    accession: accession(P, 1),
     time: P.time.label,
     ends: P.ends.label,
     dots: p.dots,
@@ -275,10 +285,11 @@ export function metaParts(P, copy) {
   }
 }
 
-// the message that opens in WhatsApp
-export function whatsappMessage(P, copy) {
+// the message that opens in WhatsApp. `extra` is an optional second line (what the guest collected)
+export function whatsappMessage(P, copy, extra = '') {
   const t = tokens(P, copy)
-  return fill(P.venue ? copy.whatsapp.withPlace : copy.whatsapp.noPlace, t)
+  const base = fill(P.venue ? copy.whatsapp.withPlace : copy.whatsapp.noPlace, t)
+  return extra ? `${base}\n${extra}` : base
 }
 
 /* ---------- calendar and WhatsApp ---------- */

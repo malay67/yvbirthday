@@ -75,6 +75,8 @@ function partyPlugin() {
             tags.push(`<meta name="twitter:card" content="summary_large_image" />`)
           }
         }
+        // which commit this build came from (Vercel sets it). after a push, load the live page until this matches the commit you pushed.
+        tags.push(`<meta name="build" content="${esc(process.env.VERCEL_GIT_COMMIT_SHA || 'local')}" />`)
         return html
           .replace('<!--party:head-->', tags.join('\n  '))
           .replace('<!--party:noscript-->', esc(meta ? meta.noscript : title))

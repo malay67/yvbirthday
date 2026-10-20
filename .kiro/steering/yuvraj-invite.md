@@ -54,7 +54,7 @@ src/main.js             boot: config check, smoke, sparks, sound, intro, scenes
 src/intro.js            gate > flame > wish > reveal
 src/style.css           all CSS
 src/scenes/index.js     scene wiring, light moods per scene, IntersectionObserver "enter"
-src/scenes/             name.js quiz.js count.js rsvp.js (+ new scenes)
+src/scenes/             name.js quiz.js count.js rsvp.js, collection.js (+ collection-art.js), print.js (+ posters.js), end.js
 src/ui/                 wheel.js cigarette.js disclaimer.js sound.js
 src/fx/                 audio.js (Sfx) haptics.js (buzz) sparks.js
 src/gl/smoke.js         WebGL smoke shader
@@ -106,11 +106,23 @@ Old flows (wheel, flame, blow twice, reveal, every scene, all quiz answers, coun
 - Rail = native sideways scroll-snap (`#colRail`), no library. Colour filter uses GSAP Flip, plus the `#tint` overlay. Reduced motion: no Flip, no hint nudge, tint toned down.
 - Scene light moods are keyed by scene id in `src/scenes/index.js`, so inserting a scene never shifts the others.
 
+## The Print Room and the end card (stage 2, live)
+
+- Where the guest gets there: a small "Make a poster" link under the ticket buttons (`#posterLink`, copy `rsvp.poster`) and the scene order. The ticket scene has no arrow; that link is its way on.
+- All text is in `copy.print` and `copy.end`. Poster lines: `copy.print.lines` (18 now, first one is always the first poster, the rest come shuffled; keep each under 40 characters after `{name}` `{weekday}` `{time}` are filled in). Add a line by adding a string to the array.
+- The three looks are drawn by `src/scenes/posters.js` (`subway`, `swiss`, `scan`) onto ONE canvas, `#posterCanvas`, 1080x1350. The picture for a given line and look is always the same (seeded by a hash of the two), so a re-tap draws the same poster. The fonts are forced to load first (`loadFonts()`), then the poster is redrawn.
+- NEVER call `getImageData` on `#posterCanvas` (it switches the canvas to software rendering and changes the pixels). Read it with `toDataURL`/`toBlob`. Offscreen canvases (the scan look's type mask) are fine to read.
+- `src/scenes/print.js` holds the state: look, line index, own line (max 40, never stored), designed-by name (max 24, remembered in `localStorage['yuv-designer']`, in try/catch). A PNG blob is made 450 ms after any change, so Share is instant; if the tap comes sooner, a synchronous `toDataURL` copy is used inside the tap.
+- Share: `navigator.share({ files, title, text })` called straight from the tap (iOS drops the user activation after any `await`). Used only if `navigator.canShare({ files })` says yes; otherwise, or on any error other than AbortError/InvalidStateError (guest closed the share sheet, silent), the Save sheet opens with the poster as an `<img>` (press and hold) and a Download link. File name `yuvraj-birthday-<look>.png`.
+- The two sheets (`#writeSheet`, `#saveSheet`) are full-screen and fixed, kept in step with the part of the screen the phone really shows (`visualViewport` into `--vvh` and `--vvt`), fields at the top so the keyboard never hides them. While one is open: `html.is-sheet`, `inert` on `#main` and `#bar`, Escape closes, focus is trapped and goes back to the button that opened it.
+- End card: `end.js`. The button `#againBtn` ("Light it again") drops `?skip` and reloads, so the guest is back in the dark at the top. It used to live in `rsvp.js`.
+- The cigarette burns by scroll progress over all 7 scenes and stubs out at the end card.
+
 ## Status
 
 Update this after every stage so a new chat can pick up.
 
 - [x] Handover done. Tag `live-v1` pushed to origin (rollback point, commit 63643af).
 - [x] Stage 1: Collection. LIVE since commit e7308fc. Verified locally and on live (96 checks: cards, collect, reload, stub, WhatsApp line, 5 colours, Show all, shuffle, keys, real touch swipes, reduced motion, no storage, 4x CPU, cigarette, old flows at 390x844 and 360x640). Bundle before/after (gzip): JS 70.4 KB to 83.5 KB, CSS 6.6 KB to 8.6 KB, HTML 3.4 KB to 4.1 KB.
-- [ ] Stage 2: Print room. Not started.
+- [x] Stage 2: Print room and end card. LIVE since commit 2a88846. Verified locally and on live: 162 checks (structure, 3 looks x 18 lines, own line and name, 40/24 caps, emoji and 34-letter word, share stub, canShare false, no share at all, refusal paths, fake keyboard 390x420 and an iPhone-style visual viewport, reduced motion, storage that throws, 4x CPU, end card and Light it again from a real intro, cigarette, 8 sizes) plus the stage 1 suite (95 of 96 on the new build, the one miss is the scene order that changed on purpose) and the old-scene walk. Contact sheets of all 54 posters were looked at. Bundle (gzip): JS 83.5 KB to 90.3 KB, CSS 8.6 KB to 9.5 KB, HTML 4.1 KB to 5.1 KB. Not tested: a real iPhone or a real Android share sheet (the share call is stubbed).
 - [ ] Stage 3: extras. Not started.

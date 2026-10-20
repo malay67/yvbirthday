@@ -76,7 +76,7 @@ npm run dev        -> dev server (long-running: ask the user to start it, do not
 
 - WebGL is slow in headless Edge: add `?q=0.35` and use `?skip` unless testing the intro.
 - To light the wheel: drag in about 10 small mouse steps about 15 ms apart, starting inside the wheel (about 84% down the screen on phones, 72% on desktop).
-- Real touch swipes: CDP `Input.synthesizeScrollGesture` with `gestureSourceType: 'touch'` (negative `yDistance` scrolls down).
+- Real touch swipes: CDP `Input.dispatchTouchEvent` (touchStart, a dozen touchMove 16 ms apart, touchEnd). `Input.synthesizeScrollGesture` with `gestureSourceType: 'touch'` does nothing in headless Edge, so do not use it.
 - 4x CPU: CDP `Emulation.setCPUThrottlingRate`.
 - The dev machine clock may not match the story date; use `?now=2026-10-11T12:00` to see the day the user describes.
 
@@ -97,11 +97,20 @@ Old flows (wheel, flame, blow twice, reveal, every scene, all quiz answers, coun
 2. Print room (after the RSVP): Subway, Swiss and Scan posters, 1080x1350 PNG on a canvas, fonts loaded first, Share via `navigator.share({ files })` called straight from the tap, fallback `<img>` + Download, typing in a fixed full-screen sheet. End card with Light it again.
 3. Extras, only once 1 and 2 are live: archive search sheet, "Fonts in use" colophon (real designer and foundry names from the font packages), small gallery room labels (only if they fit at 320px), scanned photographs from `public/archive/` if any (re-encode to 1200px max, under 250 KB, strips GPS).
 
+## The Collection (stage 1, live)
+
+- Objects, colours and every line on the cards: `copy.collection` in `src/copy.js` (see the comment above it). To add an object, copy a `{ ... }` block in `objects`, give it a new `id`, pick 2 or 3 colour ids from `swatches`, and pick a drawing name for `art`.
+- The drawings are hand-made SVG line art in `src/scenes/collection-art.js` (`man lighter phone ashtray glass cab voice course`). A new `art` name needs a new drawing there, or it falls back to nothing.
+- Acc. no. is built by `accession(P, n)` in `src/lib/party.js` from the birthday in the config and the card's place in the list. Never type one.
+- What the guest collected lives in `localStorage['yuv-collected']` (ids). `src/lib/collected.js` wraps it (try/catch, works without storage). It feeds the stub punch card (`rsvp.js`) and the extra WhatsApp line (`whatsapp.collected` / `whatsapp.more` in copy.js, at most three names).
+- Rail = native sideways scroll-snap (`#colRail`), no library. Colour filter uses GSAP Flip, plus the `#tint` overlay. Reduced motion: no Flip, no hint nudge, tint toned down.
+- Scene light moods are keyed by scene id in `src/scenes/index.js`, so inserting a scene never shifts the others.
+
 ## Status
 
 Update this after every stage so a new chat can pick up.
 
 - [x] Handover done. Tag `live-v1` pushed to origin (rollback point, commit 63643af).
-- [ ] Stage 1: Collection. Not started.
+- [x] Stage 1: Collection. LIVE since commit e7308fc. Verified locally and on live (96 checks: cards, collect, reload, stub, WhatsApp line, 5 colours, Show all, shuffle, keys, real touch swipes, reduced motion, no storage, 4x CPU, cigarette, old flows at 390x844 and 360x640). Bundle before/after (gzip): JS 70.4 KB to 83.5 KB, CSS 6.6 KB to 8.6 KB, HTML 3.4 KB to 4.1 KB.
 - [ ] Stage 2: Print room. Not started.
 - [ ] Stage 3: extras. Not started.

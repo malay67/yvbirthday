@@ -43,7 +43,10 @@ export function initArchive({ P, T, sfx, goto, collection, colophon }) {
   if (!btn || !sheet) return
 
   const sw = Object.fromEntries(copy.collection.swatches.map((s) => [s.id, s]))
-  const base = { ...T, objects: copy.collection.objects.length, rooms: copy.rooms.length }
+  // the missing cake is in the Collection (and in the search) only if there is a cake joke: copy.cakeGuy
+  const cake = T.cakeGuy ? copy.cake.card : null
+  const base = { ...T, objects: copy.collection.objects.length, rooms: copy.rooms.length, missing: cake ? 1 : 0 }
+  const hintText = fill(cake ? C.hintMissing : C.hint, base)
 
   /* ---------- what it knows ---------- */
   // each text it can be found by has a weight: a hit in the title counts more than one in the small print
@@ -73,6 +76,25 @@ export function initArchive({ P, T, sfx, goto, collection, colophon }) {
       ],
     })
   })
+  if (cake) {
+    const t = { ...base, accession: accession(P, copy.collection.objects.length + 1) }
+    const title = fill(cake.title, t)
+    entries.push({
+      kind: 'object',
+      id: cake.id,
+      label: fill(C.kind.missing, t),
+      title,
+      line: fill(cake.note, t),
+      hues: null, // no colours: it gets the arrow, like a room
+      fields: [
+        field(title, 5),
+        field((cake.tags || []).join(' '), 4),
+        field(fill(cake.sub || '', t), 3),
+        field((cake.rows || []).map(([, v]) => fill(v, t)).join(' '), 2),
+        field(fill(cake.note, t), 1),
+      ],
+    })
+  }
   copy.rooms.forEach((r, i) => {
     const title = fill(r.name, base)
     const line = fill(r.line, base)
@@ -159,7 +181,7 @@ export function initArchive({ P, T, sfx, goto, collection, colophon }) {
     const r = search(q)
     tryEl.hidden = !!r
     if (!r) {
-      statusEl.textContent = fill(C.hint, base)
+      statusEl.textContent = hintText
       listEl.replaceChildren()
       return
     }

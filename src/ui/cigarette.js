@@ -8,13 +8,15 @@ const FILTER = 14 // px of filter that never burns (matches .cig__filter)
 const STUB = 12 // px of paper left at the end, like a real butt
 const ASH_MAX = 15
 
-export function initCigarette({ scenes }) {
+export function initCigarette({ scenes, sfx }) {
   const cig = document.getElementById('cig')
   if (!cig) return
+  const bottle = document.getElementById('cigBottle')
 
   let H = 0
   let frame = 0
   let out = false
+  let lastPlink = -1e9
 
   const measure = () => {
     H = cig.clientHeight
@@ -39,6 +41,12 @@ export function initCigarette({ scenes }) {
     if (isOut !== out) {
       out = isOut
       cig.classList.toggle('is-out', out)
+      // at the very end it is stubbed out in a little bottle, with a plink (not again within a few seconds, if he wobbles at the edge)
+      if (bottle) bottle.classList.toggle('is-on', out)
+      if (out && sfx && performance.now() - lastPlink > 4000) {
+        lastPlink = performance.now()
+        sfx.plink()
+      }
     }
   }
 

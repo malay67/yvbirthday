@@ -222,6 +222,8 @@ export function tokens(P, copy) {
     tonight: P.tonight,
     birthdayWeekday: b.weekday,
     birthdayDate: `${b.weekdayShort} ${b.d} ${b.monthShort}`,
+    // the friend who promised the cake. empty means there are no cake jokes at all
+    cakeGuy: str(copy.cakeGuy),
   }
   // a weekday party is the next morning's problem. a weekend night has no excuses.
   t.dayJoke = fill(P.weekend ? copy.hero.weekendLine : copy.hero.weekdayLine, t)

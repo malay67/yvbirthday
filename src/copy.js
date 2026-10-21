@@ -27,6 +27,7 @@
      {partyDay}                the party day in full, like "Monday 12 October"
      {accession}               an Acc. no. built from his birthday, like 2026.10.11.001 (used on the Collection cards)
      {tonight}                 Tonight (or Today for a daytime party)
+     {cakeGuy}                 the friend who promised the cake, see `cakeGuy` just below
      {dayJoke}                 the day-of-the-week joke. It switches itself to
                                the weekend version when the party is on one.
 
@@ -34,6 +35,12 @@
 */
 
 export const copy = {
+  // THE CAKE. One friend promised a cake and the cake never arrived. His name is written here, once, and every cake joke on the
+  // site uses it (they are all in `cake`, further down). Change `Baba` to another name, or to `a friend`: it reads fine both ways.
+  // Leave it empty (``) and every cake joke goes away: the small white line at the wish, the missing card in the Collection,
+  // and the small white line on the ticket and on the last screen.
+  cakeGuy: `Baba`,
+
   // shown wherever the venue goes, until you add one in party.config.js
   place: { empty: `Pin on WhatsApp` },
 
@@ -82,14 +89,35 @@ export const copy = {
   },
 
   // scene 2: who do you call?
-  // In every list of answers, the one that says {name} is the right one.
+  // In every list of answers, the one that says {name} is the right one (it also gets "Correct." above its line).
+  // Every answer has its own line: `t` is the button, `line` is what the page says back.
   quiz: {
     title: `Who do you call?`,
     right: `Correct.`,
     questions: [
-      { q: `3 AM. Car's dead. You call...`, options: [`Mom`, `Insurance`, `{name}`], punch: `Even Mom would call {name}.` },
-      { q: `Group chat war. 200 unread. Who fixes it?`, options: [`Admin`, `Time`, `{name}`], punch: `One voice note. Ceasefire.` },
-      { q: `Need a lighter?`, options: [`Shop`, `{name}`], punch: `He has four. None are his.` },
+      {
+        q: `3 AM. Car's dead. You call...`,
+        options: [
+          { t: `Mom`, line: `Mom asks questions. {name} brings cables.` },
+          { t: `Insurance`, line: `On hold, 45 minutes. {name}'s already there.` },
+          { t: `{name}`, line: `Even Mom would call {name}.` },
+        ],
+      },
+      {
+        q: `Group chat war. 200 unread. Who fixes it?`,
+        options: [
+          { t: `Admin`, line: `Admin muted the group. {name} sent a voice note.` },
+          { t: `Time`, line: `Time made it 400 unread. One voice note. Ceasefire.` },
+          { t: `{name}`, line: `One voice note. Ceasefire.` },
+        ],
+      },
+      {
+        q: `Need a lighter?`,
+        options: [
+          { t: `Shop`, line: `Shop's shut. He has four. None are his.` },
+          { t: `{name}`, line: `He has four. None are his.` },
+        ],
+      },
     ],
   },
 
@@ -104,9 +132,15 @@ export const copy = {
   // `short` is the little name used in the WhatsApp message ("Collected: the lighter (not his), ...").
   // `art` is the name of the drawing (they live in src/scenes/collection-art.js).
   // `tags` are extra words that find the object in the search (the magnifier in the top bar). Plain lowercase words.
+  // `tap` (optional) turns the drawing into a button. `label` is what a screen reader calls it. Each tap moves to the next of `states`
+  //       and after the last one it goes back to the start. A state can change the `note`, the `sub` line, or single rows:
+  //       `rows: { 1: 'new text' }` (the second row; counting from 0). Whatever a state does not mention stays as it was.
+  //       Keep a state about as long as the line it replaces, so the card never changes size. The little animation for each
+  //       drawing is in src/scenes/collection-act.js.
   collection: {
     title: `The {name} Collection`, // the small line above the cards
     acc: `Acc. no. {accession}`, // top of every card. the number is worked out for you
+    tapHint: `tap the object`, // a small hint on the first card, shown once, until he taps a drawing
     prev: `Previous object`, // what a screen reader calls the arrows
     next: `Next object`,
     collect: `Collect`, // the big button
@@ -146,6 +180,7 @@ export const copy = {
         colours: [`ash`, `amber`, `black`],
         art: `man`,
         tags: [`him`, `human`, `portrait`, `loyalty`, `birthday`], // extra words that find it in the search
+        tap: { label: `Answer the phone`, states: [{ note: `Picked up. It's 3 AM somewhere.` }] },
       },
       {
         id: `lighter`,
@@ -160,6 +195,7 @@ export const copy = {
         colours: [`ember`, `yellow`],
         art: `lighter`,
         tags: [`flame`, `fire`, `light`, `zippo`, `match`, `borrowed`], // extra words that find it in the search
+        tap: { label: `Flick the lighter`, states: [{ note: `Update: he now has five. Check your pockets.` }] },
       },
       {
         id: `phone`,
@@ -174,20 +210,22 @@ export const copy = {
         colours: [`black`, `ash`],
         art: `phone`,
         tags: [`call`, `mobile`, `battery`, `3am`, `cracked`], // extra words that find it in the search
+        tap: { label: `Tap the cracked screen`, states: [{ note: `Battery 1%. Still on the call.` }] },
       },
       {
         id: `ashtray`,
         short: `the ashtray`,
-        title: `Ashtray`,
+        title: `Ashtray (Diet Coke bottle)`,
         sub: ``,
         rows: [
-          [`Medium`, `Glass, ash, good intentions`],
-          [`Condition`, `Full`],
+          [`Medium`, `Readymade; Diet Coke bottle, ash`],
+          [`Credit line`, `Converted by the artist, on site`],
         ],
-        note: `Quitting tomorrow. Tomorrow is running late.`,
+        note: `Zero sugar. Full of ash.`,
         colours: [`ash`, `ember`],
-        art: `ashtray`,
-        tags: [`smoke`, `smoking`, `cigarette`, `cigarettes`, `ash`, `quit`], // extra words that find it in the search
+        art: `bottle`,
+        tags: [`ashtray`, `diet`, `coke`, `bottle`, `soda`, `readymade`, `smoke`, `smoking`, `cigarette`, `cigarettes`, `ash`, `quit`], // extra words that find it in the search
+        tap: { label: `Stub one out`, states: [{ note: `Zero sugar. Fuller of ash.` }, { note: `He'll find another bottle.` }] },
       },
       {
         id: `glass`,
@@ -202,6 +240,7 @@ export const copy = {
         colours: [`amber`, `black`],
         art: `glass`,
         tags: [`whisky`, `whiskey`, `drink`, `peg`, `pegs`, `rum`, `beer`, `bar`], // extra words that find it in the search
+        tap: { label: `Pour another`, states: [{ sub: `"Bas ek last" (refill 2)` }, { sub: `"Bas ek last" (refill 3)` }] },
       },
       {
         id: `cab`,
@@ -216,6 +255,7 @@ export const copy = {
         colours: [`yellow`, `black`],
         art: `cab`,
         tags: [`taxi`, `uber`, `ola`, `ride`, `car`, `kaali`, `peeli`], // extra words that find it in the search
+        tap: { label: `Print another receipt`, states: [{ note: `Another one. Not for him.` }] },
       },
       {
         id: `voice`,
@@ -231,6 +271,7 @@ export const copy = {
         colours: [`ember`, `black`],
         art: `voice`,
         tags: [`audio`, `whatsapp`, `group`, `chat`, `war`, `ceasefire`], // extra words that find it in the search
+        tap: { label: `Play the voice note`, states: [{ rows: { 1: `Group chat, 0 unread` } }] },
       },
       {
         id: `course`,
@@ -245,8 +286,39 @@ export const copy = {
         colours: [`amber`, `yellow`],
         art: `course`,
         tags: [`course`, `class`, `lesson`, `school`, `problems`, `fix`, `help`, `sorted`], // extra words that find it in the search
+        tap: { label: `Sign up`, states: [{ note: `Waitlist: everyone.` }] },
       },
     ],
+  },
+
+  // THE CAKE JOKES. All of them are here, and all of them use {cakeGuy} (set at the very top of this file). If `cakeGuy` is
+  // empty none of this is used.
+  //   wish    the small white line at the bottom while "Make a wish." is on screen
+  //   ticket  the same small line when the ticket is on screen, before the party
+  //   end     the same small line on the last screen, after the party
+  //   card    one more card at the end of the Collection: the missing object. It is card 09 of 08 on purpose. It is not in the
+  //           count of things to collect, not in Shuffle, not in the colours, and not in the WhatsApp message.
+  cake: {
+    wish: `The cake in this scene is fictitious. Story by {cakeGuy}.`,
+    ticket: `Unlike a certain cake, this party is real.`,
+    end: `The party happened. The cake, allegedly.`,
+    card: {
+      id: `cake`,
+      title: `Cake, {cakeGuy}'s`,
+      sub: `Missing object`,
+      rows: [
+        [`Reported`, `{birthday}, by {cakeGuy}`],
+        [`Medium`, `Unconfirmed`],
+        [`Condition`, `Not located`],
+        [`Credit line`, `Promised by {cakeGuy}`],
+      ],
+      note: `Bought, says {cakeGuy}. You'd just left, says {cakeGuy}.`,
+      caption: `Image not available`, // in the dashed outline, where the picture would be
+      tags: [`cake`, `birthday`, `candles`, `dessert`, `sweet`, `missing`, `promised`, `bought`, `lost`], // extra words that find it in the search (his name is found without any help: it is in the title)
+      tap: { label: `Search for the cake`, states: [{ note: `Searching... 0 results.` }] },
+      report: `Report a sighting`, // the big button on this card, in the place of Collect
+      sightings: `0 sightings.`, // what the big button says for a moment after a tap
+    },
   },
 
   // scene 4: the countdown, in Yuvraj time
@@ -376,6 +448,8 @@ export const copy = {
       `Kal se pakka band.`,
       `Ceasefire by voice note.`,
       `Ashtray: full. Phone: 4%.`,
+      `Anything is an ashtray.`,
+      `Zero sugar. Full of ash.`,
     ],
   },
 
@@ -414,12 +488,13 @@ export const copy = {
     inputLabel: `Search`, // screen readers
     placeholder: `Try "lighter"`,
     hint: `{objects} objects, {rooms} rooms. Ask anything.`, // before you type
+    hintMissing: `{objects} objects, {rooms} rooms, {missing} missing. Ask anything.`, // the same, while the cake card is in the Collection
     suggest: [`lighter`, `3 AM`, `sleep`, `where`], // little buttons under the hint. Tap one to search for it
     suggestLabel: `Try`, // screen readers, before those buttons
     count: `{n} records`, // above the results
     countOne: `1 record`,
     none: `Nothing under "{q}". Ask {name}, he knows a guy.`,
-    kind: { object: `Acc. no. {accession}`, room: `Room {n}`, extra: `Credits`, answer: `No record` }, // the small label above each result
+    kind: { object: `Acc. no. {accession}`, room: `Room {n}`, extra: `Credits`, answer: `No record`, missing: `Missing object` }, // the small label above each result
     go: `Open`, // screen readers, on a result that takes you somewhere
     extras: [{ id: `fonts`, name: `Fonts in use`, line: `Three typefaces, and who made them.`, words: [`font`, `fonts`, `typeface`, `type`, `credits`, `colophon`, `designer`] }],
     answers: [

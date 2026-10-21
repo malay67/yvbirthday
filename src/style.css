@@ -391,8 +391,9 @@ html.is-live .cig{opacity:1}
   html{scroll-snap-type:none}
   .next,.disclaimer{display:none}
 }
-/* a phone on its side under 400px tall (an iPhone SE, say) has no spare room: the film line steps aside rather than sit on a card or the ticket */
-@media (max-height:399px) and (orientation:landscape){.disclaimer{display:none}}
+/* a phone on its side under 380px tall (an iPhone SE, say) has no spare room: the film line steps aside rather than sit on a card or the ticket.
+   an iPhone 12 or later on its side is 390px tall and keeps it */
+@media (max-height:379px) and (orientation:landscape){.disclaimer{display:none}}
 
 /* ---------- small phones, short: tighten a little so a scene still fits one screen ---------- */
 @media (max-width:760px) and (max-height:680px) and (orientation:portrait){
@@ -755,3 +756,61 @@ button.hit:active{background:rgba(233,162,59,.18);border-color:var(--amber)}
 .colo__item .obj__meta{font-size:16px}
 .colo__item .obj__meta>div{padding:6px 0}
 .end__fonts{margin-top:-8px}
+
+/* ============================================================
+   THE DRAWINGS ARE BUTTONS (round 2): tap the object
+   Each card's drawing moves the card to its next state: a new line, a little animation, a sound. See collection.js.
+   ============================================================ */
+.obj__tap{display:block;padding:0;line-height:0;color:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.obj__tap:focus-visible{outline:1px solid var(--paper-ink);outline-offset:4px}
+.obj__tap .obj__art{transition:transform .15s var(--ease)}
+.obj__tap:active .obj__art{transform:scale(.94)}
+/* the parts of a drawing that only show once it is tapped (collection-art.js), and lettering inside a drawing */
+.obj__art .act{opacity:0}
+.obj__art text{font-family:var(--f-display);fill:currentColor;stroke:none;letter-spacing:.06em}
+.obj__art text.acc{fill:var(--stamp);stroke:none}
+/* a line that changes when the drawing is tapped: all of its versions sit on top of each other and one shows,
+   so the line (and the card) is always as tall as the tallest version */
+.obj__vary{display:grid}
+.obj__vary>.v{grid-area:1/1;opacity:0;visibility:hidden;transition:opacity .25s,visibility 0s .25s}
+.obj__vary>.v.is-on{opacity:1;visibility:visible;transition:opacity .25s,visibility 0s}
+/* "tap the object": once, on the first card, in the empty paper under his name (where the COLLECTED stamp lands) */
+.obj__hint{position:absolute;left:2px;bottom:2px;max-width:calc(100% - 150px);font-size:11px;letter-spacing:.1em;line-height:1.3;color:rgba(20,16,13,.62);opacity:0;transition:opacity .6s var(--ease);pointer-events:none}
+.obj.is-hinting .obj__hint{opacity:1}
+@media (max-height:520px) and (orientation:landscape){.obj__hint{display:none}} /* a phone on its side: no room for it */
+/* the missing cake (card 09 of 08): nothing to punch, a frame with no picture in it, and the reason */
+.obj--missing .obj__top{padding-left:0}
+.obj--missing .obj__top::before{display:none}
+.obj--missing .obj__art{color:rgba(20,16,13,.55);aspect-ratio:96/58} /* a shorter box: the frame is drawn smaller, so this card is not taller than the others */
+.obj--missing .obj__tap{display:grid;place-items:center;min-width:48px;min-height:48px} /* (the tap area is still 48px) */
+.obj__cap{margin:0;font-size:10.5px;line-height:1.25;letter-spacing:.08em;color:rgba(20,16,13,.62)}
+/* this card has a fourth row, so its rows and gaps are a little tighter. it must never be taller than the others (every screen fits 360x640) */
+.obj--missing .obj__titles{gap:3px}
+.obj--missing .obj__meta>div{padding:3px 0}
+@media (max-width:759px) and (orientation:portrait){
+  .obj--missing .obj__paper{gap:6px}
+  .obj--missing .obj__note{margin-top:5px}
+}
+@media (min-width:760px) and (min-height:521px){
+  .obj__title--long{font-size:50px}
+  .obj--missing .obj__art{width:78px}
+  .obj--missing .obj__title{font-size:50px}
+  .obj--missing .obj__meta{font-size:13.5px}
+  .obj--missing .obj__note{font-size:23px;margin-top:6px}
+}
+@media (max-height:520px) and (orientation:landscape){
+  .obj--missing .obj__title{font-size:clamp(26px,8svh,32px)}
+  .obj--missing .obj__cap{display:none}
+}
+/* Report a sighting is longer than Collect, so it is set a little smaller and centred (and has no tally beside it) */
+.col__collect.is-report{justify-content:center;font-size:12px;letter-spacing:.04em}
+
+/* at the very end the cigarette goes out in a little bottle. a plain one, with no label */
+.cigBottle{position:fixed;z-index:38;right:calc(max(7px,var(--sa-r)) - 7.5px);bottom:calc(var(--sa-b) + 53px);width:20px;height:46px;color:rgba(236,227,211,.62);pointer-events:none;opacity:0;transform:translateY(10px);transition:opacity .5s var(--ease),transform .5s var(--ease)}
+.cigBottle svg{display:block;width:100%;height:100%}
+.cigBottle.is-on{opacity:1;transform:none}
+html:not(.is-live) .cigBottle{display:none}
+@media (prefers-reduced-motion:reduce){
+  .obj__vary>.v,.obj__vary>.v.is-on,.obj__tap .obj__art,.cigBottle,.obj__hint{transition:none}
+  .cigBottle{transform:none}
+}

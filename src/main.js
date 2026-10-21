@@ -93,7 +93,7 @@ function start(P) {
           // the film line changes once his name is up, and the cigarette starts to burn
           ({ scenes }) => {
             setDisclaimer(fill(copy.disclaimer.done, T))
-            initCigarette({ scenes })
+            initCigarette({ scenes, sfx })
           },
         ],
       }),

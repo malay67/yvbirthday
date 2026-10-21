@@ -23,10 +23,10 @@ export function initQuiz({ T, sfx, onDone }) {
   const stage = $('#quizStage')
   const pips = $$('#quizPips li')
 
+  // every answer has its own line back: t is the button, line is what the page says
   const Q = copy.quiz.questions.map((q) => ({
     q: fill(q.q, T),
-    options: q.options.map((o) => fill(o, T)),
-    punch: fill(q.punch, T),
+    options: q.options.map((o) => ({ t: fill(o.t, T), line: fill(o.line, T) })),
   }))
 
   let idx = -1
@@ -50,13 +50,13 @@ export function initQuiz({ T, sfx, onDone }) {
     gsap.set(optsEl, { opacity: 1, y: 0 })
 
     optsEl.textContent = ''
-    Q[i].options.forEach((label) => {
+    Q[i].options.forEach((opt) => {
       const b = document.createElement('button')
       b.type = 'button'
       b.className = 'opt'
       b.innerHTML = '<span class="opt__t"></span><span class="opt__a" aria-hidden="true">→</span>'
-      b.firstChild.textContent = label
-      b.addEventListener('click', () => pick(b, label))
+      b.firstChild.textContent = opt.t
+      b.addEventListener('click', () => pick(b, opt))
       optsEl.append(b)
     })
     pips.forEach((p, k) => p.classList.toggle('is-on', k <= i))
@@ -74,7 +74,7 @@ export function initQuiz({ T, sfx, onDone }) {
       .add(() => (locked = false), 0.5 * d)
   }
 
-  function pick(btn, label) {
+  function pick(btn, opt) {
     if (locked || state !== 'asking') return
     locked = true
     state = 'answered'
@@ -82,7 +82,7 @@ export function initQuiz({ T, sfx, onDone }) {
     if (enterTl) enterTl.kill()
     enterTl = null
     gsap.to(btn, { opacity: 1, y: 0, duration: 0.12 })
-    const right = label === T.name
+    const right = opt.t === T.name
     sfx.unlock()
     if (right) sfx.clink()
     else sfx.tick(1)
@@ -106,7 +106,7 @@ export function initQuiz({ T, sfx, onDone }) {
       .add(() => {
         okEl.textContent = right ? fill(copy.quiz.right, T) : ''
         okEl.hidden = !right
-        pEl.textContent = Q[idx].punch
+        pEl.textContent = opt.line
         gsap.set(aEl, { y: 14 })
       })
       .to(aEl, { opacity: 1, y: 0, duration: reduce ? 0 : 0.55, ease: 'power3.out' })

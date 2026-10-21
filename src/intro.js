@@ -147,6 +147,8 @@ export function createIntro({ smoke, sparks, sfx, hero, T, onDone }) {
       .to(rig, { y: d * 0.3, opacity: 0, duration: 1.3, ease: 'power3.in' }, 0)
       .to(u, { lift: 0.3, density: 1.15, duration: 1.6, ease: 'power2.out' }, 0)
       .set(wish, { visibility: 'visible' }, 0.9)
+      // with "Make a wish." comes one more line before the film (the cake joke; nothing at all if copy.cakeGuy is empty)
+      .add(() => T.cakeGuy && setDisclaimer(say(copy.cake.wish)), 1.0)
       .fromTo(wishLine, { opacity: 0, y: 18, filter: 'blur(10px)' }, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 1.3, ease: 'power3.out' }, 0.9)
       .fromTo(wishHint, { opacity: 0 }, { opacity: 1, duration: 0.9 }, 2)
       .add(arm, 1.7)

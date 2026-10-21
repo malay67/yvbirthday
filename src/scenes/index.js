@@ -1,3 +1,6 @@
+import { copy } from '../copy.js'
+import { fill } from '../lib/party.js'
+import { setDisclaimer } from '../ui/disclaimer.js'
 import { initName } from './name.js'
 import { initQuiz } from './quiz.js'
 import { initCollection } from './collection.js'
@@ -55,7 +58,7 @@ export function initScenes({ P, T, smoke, sparks, sfx, clock, after = false, ext
   /* ---- the scenes ---- */
   initName({ T, sparks, sfx })
   const quiz = initQuiz({ T, sfx, onDone: () => ready('#scene-quiz') })
-  const collection = initCollection({ P, T, sfx })
+  const collection = initCollection({ P, T, sfx, sparks })
   const count = initCount({ P, T, clock, sfx })
   const rsvp = initRsvp({ P, T, sparks, sfx, after })
   const print = initPrint({ P, T, sfx })
@@ -88,6 +91,27 @@ export function initScenes({ P, T, smoke, sparks, sfx, clock, after = false, ext
     { threshold: [0, 0.25, 0.5, 0.75, 1] }
   )
   scenes.forEach((s) => io.observe(s))
+
+  /* ---- the small white line at the bottom follows the scene ---- */
+  // two scenes have their own line, and only if there is a cake joke (copy.cakeGuy): the ticket before the party, the last screen after it
+  const filmFor = {}
+  if (T.cakeGuy) {
+    filmFor['scene-rsvp'] = after ? '' : fill(copy.cake.ticket, T)
+    filmFor['scene-end'] = after ? fill(copy.cake.end, T) : ''
+  }
+  if (Object.values(filmFor).some(Boolean)) {
+    const idle = fill(copy.disclaimer.done, T)
+    const fio = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (!e.isIntersecting || e.intersectionRatio < 0.5) continue
+          setDisclaimer(filmFor[e.target.id] || idle)
+        }
+      },
+      { threshold: [0.5] }
+    )
+    scenes.forEach((s) => fio.observe(s))
+  }
 
   /* ---- the light moves with you ---- */
   // one mood per scene, by id, so adding a scene never shifts the others

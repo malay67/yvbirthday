@@ -4,10 +4,12 @@
 */
 const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 let timer = 0
+let want = '' // the words it is heading for (it may still be fading out the old ones)
 
 export function setDisclaimer(text) {
   const el = document.getElementById('disclaimer')
-  if (!el || !text || el.textContent === text) return
+  if (!el || !text || text === want) return
+  want = text
   clearTimeout(timer)
   const show = () => {
     el.textContent = text
@@ -15,6 +17,11 @@ export function setDisclaimer(text) {
   }
   if (!el.textContent || reduce) {
     show()
+    return
+  }
+  // asked for the words that are still on screen (it was going to change, and changed its mind): just keep them
+  if (el.textContent === text) {
+    el.classList.add('is-on')
     return
   }
   el.classList.remove('is-on')

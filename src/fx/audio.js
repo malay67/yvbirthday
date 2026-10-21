@@ -178,6 +178,27 @@ export class Sfx {
     this._burst({ type: 'lowpass', f: 1800, q: 0.7, gain: 0.32, attack: 0.002, dur: 0.07 })
   }
 
+  /* something small and hard dropping into a bottle */
+  plink() {
+    this._tone({ f: 2350, f2: 1850, gain: 0.09, dur: 0.24 })
+    this._tone({ f: 3520, gain: 0.03, dur: 0.12, delay: 0.004 })
+    this._burst({ f: 5200, q: 3, gain: 0.05, attack: 0.001, dur: 0.02 })
+  }
+
+  /* a screen cracking: a few dry snaps */
+  crack() {
+    ;[0, 0.045, 0.1].forEach((d, i) => this._burst({ type: 'highpass', f: 3200 + i * 900, q: 1.2, gain: 0.2 - i * 0.04, attack: 0.001, dur: 0.03 + i * 0.01, delay: d }))
+    this._tone({ f: 1300, f2: 620, type: 'triangle', gain: 0.04, dur: 0.08 })
+  }
+
+  /* a phone ringing: two short double beeps */
+  ring() {
+    ;[0, 0.17].forEach((d) => {
+      this._tone({ f: 1040, type: 'triangle', gain: 0.06, dur: 0.1, delay: d })
+      this._tone({ f: 1320, type: 'triangle', gain: 0.05, dur: 0.1, delay: d })
+    })
+  }
+
   /* two glasses */
   clink() {
     ;[2093, 3136, 4186, 5230].forEach((f, i) => this._tone({ f, gain: 0.05 / (1 + i * 0.5), dur: 0.9 - i * 0.12, delay: 0.02 }))

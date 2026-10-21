@@ -144,7 +144,8 @@
           <button class="col__nav" id="colPrev" type="button" aria-disabled="true" data-copy-label="collection.prev"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg></button>
           <button class="col__collect" id="colCollect" type="button" aria-pressed="false">
             <span class="col__collectV" id="colCollectV"></span>
-            <span class="col__collectN mono" id="colCollectN"></span>
+            <!-- a little punch card: one hole per object, filled when it is collected. collection.js draws the holes -->
+            <span class="col__collectN" id="colCollectN" role="img"></span>
           </button>
           <button class="col__nav" id="colNext" type="button" data-copy-label="collection.next"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg></button>
         </div>

@@ -32,9 +32,11 @@ const isAndroid = () => /Android/i.test(navigator.userAgent)
   Scene 4. A ticket, and a question with only one answer.
   "Can't make it" shrinks and runs. "Obviously" grows. Say Obviously and the stamp comes down.
 */
-export function initRsvp({ P, T, sparks, sfx }) {
+export function initRsvp({ P, T, sparks, sfx, after = false }) {
   const wrap = $('#ticketWrap')
   const stamp = $('#stamp')
+  // a longer word in the stamp (WAS THERE after the party) is set smaller to fit the ring
+  stamp.classList.toggle('is-long', String(copy.rsvp.stampBig).length > 3)
   const stage = $('#askStage')
   const yes = $('#yesBtn')
   const no = $('#noBtn')
@@ -256,10 +258,12 @@ export function initRsvp({ P, T, sparks, sfx }) {
   })
 
   const map = $('#mapLink')
-  if (P.mapLink) {
+  if (P.mapLink && !after) {
     map.href = P.mapLink
     map.hidden = false
   }
+  // after the party there is nothing to add to a calendar, and nowhere to go
+  if (after) $('#calBtn').hidden = true
 
   /* ---------- a little life ---------- */
   gsap.set(wrap, { rotation: -1.4, transformPerspective: 1200 })

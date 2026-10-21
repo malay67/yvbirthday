@@ -9,10 +9,12 @@ gsap.registerPlugin(ScrambleTextPlugin)
 const $ = (s, r = document) => r.querySelector(s)
 const pad = (n) => String(n).padStart(2, '0')
 const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+const DAY = 86400000
 
 /*
   Scene 3. The time left, but in his units. Tap the number to change them.
   The line underneath follows the calendar: before his birthday, on it, party day, during, after.
+  More than two days after the party, hours are too many to look at: the first unit counts days.
 */
 export function initCount({ P, T, clock, sfx }) {
   const bigBtn = $('#bigBtn')
@@ -33,6 +35,10 @@ export function initCount({ P, T, clock, sfx }) {
   let lineText = ''
   let tapped = false
   let flicker = null
+  let inDays = false // the first unit is showing whole days (the party is more than two days behind us)
+
+  // the small words under the number. the first unit says "days" instead of "hours" once it counts days
+  const labelOf = (i) => fill(i === 0 && inDays ? copy.count.daysLabel : units[i].label, T)
 
   units.forEach(() => pipsEl.append(document.createElement('li')))
   const pips = [...pipsEl.children]
@@ -41,6 +47,7 @@ export function initCount({ P, T, clock, sfx }) {
   /* ---------- the number ---------- */
   function cellsFor(ms) {
     const u = units[unit]
+    if (u.clock && inDays) return [...String(Math.floor(ms / DAY))].map((ch) => ({ k: 'd', ch }))
     if (u.clock) {
       const s = Math.floor(ms / 1000)
       const text = `${pad(Math.floor(s / 3600))}:${pad(Math.floor((s % 3600) / 60))}:${pad(s % 60)}`
@@ -93,7 +100,7 @@ export function initCount({ P, T, clock, sfx }) {
     const ph = phaseOf(P, now)
     const m = ph.state === 'running' ? 'late' : ph.state === 'after' ? 'over' : 'to'
     const ms = Math.max(0, m === 'to' ? P.startMs - now : m === 'late' ? now - P.startMs : now - P.endMs)
-    return { now, ph, m, ms }
+    return { now, ph, m, ms, days: m === 'over' && ms >= 2 * DAY }
   }
 
   function lineFor(ph, now) {
@@ -135,7 +142,11 @@ export function initCount({ P, T, clock, sfx }) {
 
   function render(animate = true) {
     if (flicker) return
-    const { now, ph, m, ms } = readClock()
+    const { now, ph, m, ms, days } = readClock()
+    if (days !== inDays) {
+      inDays = days
+      if (unit === 0) bigU.textContent = labelOf(0)
+    }
     paint(cellsFor(ms), animate)
 
     if (m !== mode) {
@@ -171,12 +182,13 @@ export function initCount({ P, T, clock, sfx }) {
       gsap.to(hint, { opacity: 0, duration: 0.4 })
     }
 
-    const label = fill(units[unit].label, T)
+    const { ms, days } = readClock()
+    inDays = days
+    const label = labelOf(unit)
     if (reduce) bigU.textContent = label
     else gsap.to(bigU, { duration: 0.8, scrambleText: { text: label, chars: 'lowerCase', speed: 0.6, revealDelay: 0.1 } })
 
     // the digits shuffle for a moment, then settle left to right
-    const { ms } = readClock()
     const target = cellsFor(ms)
     paint(target, false)
     if (reduce) return
@@ -188,6 +200,8 @@ export function initCount({ P, T, clock, sfx }) {
       if (p >= 1) {
         clearInterval(flicker)
         flicker = null
+        // every digit settles on its real value (a number that stands still, like the days, would otherwise keep a shuffled digit)
+        cells.forEach((c) => (c.el.textContent = c.ch))
         render(false)
         return
       }
@@ -202,7 +216,8 @@ export function initCount({ P, T, clock, sfx }) {
   bigBtn.addEventListener('click', cycle)
 
   /* ---------- go ---------- */
-  bigU.textContent = fill(units[0].label, T)
+  inDays = readClock().days
+  bigU.textContent = labelOf(0)
   paintPips()
   render(false)
   setInterval(render, 200)

@@ -112,7 +112,7 @@ export const copy = {
     collect: `Collect`, // the big button
     uncollect: `Put back`, // the same button, once that object is collected
     stamp: `Collected`, // the red stamp on a collected card
-    punchCount: `{n} / {total}`, // on the big button: how many he has
+    tally: `Collected {n} of {total}`, // screen readers: the little punch card of eight holes on the big button
     shuffle: `Shuffle`, // screen readers only, the button is a drawing of two arrows
     showAll: `Show all`, // puts every card back after you pick a colour
     byColour: `by colour`, // beside the five colour squares
@@ -274,6 +274,7 @@ export const copy = {
     rel: { same: `the same night`, next: `the day after`, after: `{n} days after`, prev: `the day before`, before: `{n} days before` },
     when: { tomorrow: `tomorrow`, inDays: `in {n} days` },
     ago: { yesterday: `yesterday`, daysAgo: `{n} days ago` },
+    daysLabel: `days`, // more than two days after the party, the first unit counts days instead of hours
     map: `Open map`, // appears once the party is on, if you added a map link
   },
 
@@ -498,5 +499,65 @@ export const copy = {
     title: `{name}'s birthday · {date} · {time}`,
     description: `{dayJoke} Spin the wheel.`,
     noscript: `{name}'s birthday. {dateLong}, {time}. This page needs JavaScript for the full show.`,
+  },
+
+  // THE DAY AFTER. Once the party is over (the page asks the clock, so it follows party.config.js), the lines below take the
+  // place of the lines with the same name above. Everything else stays as it was. The tab title, the preview card and the
+  // calendar file are made when the site is built, so they never change.
+  //
+  // TO CHANGE ONE  edit its words. {tokens} work here too ({weekday} {nextWeekday} {date} {dateLong} {partyDay} {time} {ends} {name}).
+  // TO ADD ONE     write it under the same group as the line it replaces (hero, rsvp, end ...), with the same name.
+  // Lists: a list written as a list replaces the whole list. An object, like { 14: `...` }, replaces single items:
+  // the key is the item's `id` (an object in the Collection, a room) or its place in the list, counting from 0.
+  after: {
+    bar: { rsvp: `ticket` }, // the link in the top bar. there is nothing left to RSVP to
+    disclaimer: { done: `Skipping this party was worse.` },
+    hero: {
+      weekdayLine: `It was a {weekday}. {nextWeekday} was everyone's problem.`,
+      weekendLine: `{weekday} night. Zero excuses were accepted.`,
+    },
+    collection: {
+      objects: {
+        man: { note: `On view {partyDay}. The lighter was never returned.` },
+        course: {
+          rows: [
+            [`Prerequisite`, `A dead car`],
+            [`Met`, `{partyDay}, {time} till late`],
+          ],
+        },
+      },
+    },
+    rsvp: {
+      ask: `Were you there?`,
+      nope: `Don't remember`, // this button never works either
+      fine: `Statutory warning: caused a {nextWeekday} hangover.`,
+      guilt: [`That's how you know it was good.`, `Someone has the video. You are in it.`, `He booked your cab home. The receipt exists.`],
+      noOption: `No option left. You were there.`,
+      stampTop: ``, // the stamp reads WAS THERE, over the date. (before the party: "counted" / IN / the date)
+      stampBig: `WAS THERE`,
+      done: `Knew it. Now tell him what you remember.`,
+    },
+    end: {
+      bigA: `Exhibition`,
+      bigB: `closed.`,
+      note: `Nobody drove home. The lighter is still missing.`,
+    },
+    rooms: {
+      'scene-rsvp': { line: `Were you there? Get the ticket stamped.` },
+      'scene-end': { line: `Exhibition closed. Light it again.` },
+    },
+    archive: {
+      answers: {
+        4: { line: `Nobody left before {ends}. Nobody drove home.` }, // sober, early, leave, home
+        5: { line: `Gift: you showed up. Cake: not held. Lighter: not returned.` }, // gift, cake, bring
+        6: { line: `It was {dateLong}, {time} till {ends}.` }, // when, date, day, time
+      },
+    },
+    print: { lines: { 14: `{weekday}, {time}. You missed it.` } },
+    // what opens in WhatsApp when someone says Obviously
+    whatsapp: {
+      withPlace: `I was there. {name}'s birthday, {date}. Still recovering.`,
+      noPlace: `I was there. {name}'s birthday, {date}. Still recovering.`,
+    },
   },
 }

@@ -8,6 +8,10 @@ const $$ = (s, r = document) => [...r.querySelectorAll(s)]
 const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 const fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches
 
+// the name arrives as a ghost (this opaque, this soft) and sharpens letter by letter
+const GHOST = 0.3
+const GHOST_BLUR = 2.5
+
 /* ============================================================
    the hero: letters, and how they arrive (called by the intro)
    ============================================================ */
@@ -45,13 +49,15 @@ export function createHero(P) {
     chars,
     prepare() {
       gsap.set(hb, { opacity: 0, y: 18, filter: 'blur(12px)' })
-      gsap.set(chars, { opacity: 0, yPercent: 26, scale: 1.1, filter: 'blur(28px)', color: '#d99a45' })
+      // the whole word is already there, faint and a little soft (a ghost). it is hidden with the rest of the page until the reveal
+      gsap.set(chars, { opacity: GHOST, filter: `blur(${GHOST_BLUR}px)`, color: '#d99a45' })
       gsap.set(foot, { opacity: 0, y: 14 })
       gsap.set(hint, { opacity: 0 })
     },
+    // the letters sharpen one by one, in a random order. the name can be read in every frame: nothing ever drops below the ghost
     reveal(tl, at, k = 1) {
       tl.to(hb, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 1.3 * k, ease: 'power3.out', clearProps: 'filter' }, at)
-        .to(order, { opacity: 1, yPercent: 0, scale: 1, filter: 'blur(0px)', color: '#ece3d3', duration: 1.7 * k, ease: 'power3.out', stagger: 0.11 * k, clearProps: 'filter,color,scale' }, at + 0.12 * k)
+        .to(order, { opacity: 1, filter: 'blur(0px)', color: '#ece3d3', duration: 0.95 * k, ease: 'power2.out', stagger: 0.15 * k, clearProps: 'filter,color' }, at + 0.4 * k)
         .to(foot, { opacity: 1, y: 0, duration: 1 * k, ease: 'power3.out', stagger: 0.14 * k }, at + 1.5 * k)
         .add(() => next.classList.add('is-ready'), at + 2.6 * k)
     },

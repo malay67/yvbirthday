@@ -9,6 +9,10 @@ const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 export function initEnd({ colophon } = {}) {
   const scene = $('#scene-end')
 
+  // a long word in the big line (EXHIBITION, WEDNESDAY.) gets a smaller size on a phone, see .end__big.is-long in the CSS
+  const big = $('.end__big', scene)
+  big.classList.toggle('is-long', [...big.children].some((w) => w.textContent.trim().length > 8))
+
   $('#againBtn').addEventListener('click', () => {
     const u = new URL(window.location.href)
     u.searchParams.delete('skip') // light it again means the whole thing, from the dark

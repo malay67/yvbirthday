@@ -112,6 +112,9 @@ export function initCollection({ P, T, sfx }) {
   rail.append(...slides.map((s) => s.el))
   rail.setAttribute('aria-label', fill(C.title, T))
 
+  // the tally on the Collect button: a punch card with one hole for each object (the same order as the cards)
+  const holes = slides.map(() => collectN.appendChild(make('i')))
+
   const visible = () => slides.filter((s) => !s.el.hidden)
   // scroll-snap is switched off while something moves the rail by itself. more than one thing can ask, so count them.
   let freezes = 0
@@ -161,7 +164,8 @@ export function initCollection({ P, T, sfx }) {
     const on = !!s && collected.has(s.id)
     collectV.textContent = fill(on ? C.uncollect : C.collect, T)
     collectBtn.setAttribute('aria-pressed', String(on))
-    collectN.textContent = fill(C.punchCount, { n: collected.count(), total: collected.total() })
+    holes.forEach((h, i) => h.classList.toggle('is-on', collected.has(slides[i].id)))
+    collectN.setAttribute('aria-label', fill(C.tally, { n: collected.count(), total: collected.total() }))
   }
 
   function paintFilter() {
@@ -294,6 +298,8 @@ export function initCollection({ P, T, sfx }) {
       showRestored(s, true)
     }
     paintCollect()
+    // the hole that was just punched pops a little
+    if (on && !reduce) gsap.fromTo(holes[slides.indexOf(s)], { scale: 1.9 }, { scale: 1, duration: 0.3, ease: 'back.out(3)', clearProps: 'transform' })
     ready()
   })
 

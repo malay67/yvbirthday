@@ -7,10 +7,11 @@ import '@fontsource/dm-mono/latin-500.css'
 
 import party from '../party.config.js'
 import partyRaw from '../party.config.js?raw'
-import { check, withLines, tokens, fill } from './lib/party.js'
+import { check, withLines, tokens, fill, phaseOf } from './lib/party.js'
 import { showConfigError } from './lib/config-error.js'
 import { bindCopy } from './lib/bind.js'
 import { makeClock } from './lib/clock.js'
+import { useAfter } from './lib/after.js'
 import { copy } from './copy.js'
 
 import { Smoke } from './gl/smoke.js'
@@ -36,8 +37,13 @@ if (errors.length) showConfigError(withLines(partyRaw, errors))
 else start(P)
 
 function start(P) {
-  const T = tokens(P, copy)
   const clock = makeClock(P)
+  // the party is over: the lines in copy.after take the place of the others, before anything reads them
+  const after = phaseOf(P, clock.now()).state === 'after'
+  if (after) useAfter(copy)
+  document.documentElement.classList.toggle('is-after', after)
+
+  const T = tokens(P, copy)
   bindCopy(document, T)
 
   // the strip at the top: "for Yuvraj" while the intro plays, then "Yuvraj / dd.mm.yy"
@@ -82,6 +88,7 @@ function start(P) {
         sparks,
         sfx,
         clock,
+        after,
         extras: [
           // the film line changes once his name is up, and the cigarette starts to burn
           ({ scenes }) => {

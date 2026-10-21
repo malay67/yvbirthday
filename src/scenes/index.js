@@ -26,7 +26,7 @@ const soft = (fn, fallback) => {
   Native scrolling is deliberate. It is the smoothest thing a phone can do, and it behaves
   inside the WhatsApp and Instagram browsers, where scroll-hijacking libraries do not.
 */
-export function initScenes({ P, T, smoke, sparks, sfx, clock, extras = [] }) {
+export function initScenes({ P, T, smoke, sparks, sfx, clock, after = false, extras = [] }) {
   const html = document.documentElement
   const u = smoke.u
   const scenes = [...document.querySelectorAll('.scene')]
@@ -57,7 +57,7 @@ export function initScenes({ P, T, smoke, sparks, sfx, clock, extras = [] }) {
   const quiz = initQuiz({ T, sfx, onDone: () => ready('#scene-quiz') })
   const collection = initCollection({ P, T, sfx })
   const count = initCount({ P, T, clock, sfx })
-  const rsvp = initRsvp({ P, T, sparks, sfx })
+  const rsvp = initRsvp({ P, T, sparks, sfx, after })
   const print = initPrint({ P, T, sfx })
   // the search and the credits are extras. if either one fails to start, the page carries on without it
   const colophon = soft(() => initColophon(), { open() {} })

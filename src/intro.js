@@ -4,12 +4,15 @@ import { copy } from './copy.js'
 import { fill } from './lib/party.js'
 import { buzz } from './fx/haptics.js'
 import { setDisclaimer } from './ui/disclaimer.js'
+import { hasBorrowed, markBorrowed } from './lib/borrowed.js'
+import { listenMic, micAvailable } from './fx/mic.js'
 
 /*
   The opening, in four beats.
-    gate    a dark room and a flint wheel. spin it.
+    gate    a dark room and a flint wheel. spin it. (the first time on a phone, the first good flick does not light it:
+            a borrowed lighter. see fizzleLighter)
     flame   sparks, then the flame catches and lifts off the wheel.
-    wish    "make a wish." click and you blow it out.
+    wish    "make a wish." click and you blow it out. (a small button can listen for a real breath on the microphone)
     reveal  the plume rises, the light comes on, the name steps out of the smoke.
   Skip jumps straight to reveal.
 */
@@ -26,6 +29,7 @@ export function createIntro({ smoke, sparks, sfx, hero, T, onDone }) {
   const wish = $('#wish')
   const wishLine = $('#wishLine')
   const wishHint = $('#wishHint')
+  const micBtn = $('#wishMic')
   const rig = $('#wheelRig')
   const wheel = $('#wheel')
   const skipBtn = $('#skip')
@@ -50,6 +54,16 @@ export function createIntro({ smoke, sparks, sfx, hero, T, onDone }) {
   let idleBlow = null
   let disarm = null
   let fizzling = false // the first breath fails; while it does, the flame ignores the pointer
+  let baseHint = HINT_SPIN // what the line under "It's dark in here." goes back to after "harder."
+  // the microphone (only if the guest taps "Blow for real"): idle | asking | on | failed
+  let micState = 'idle'
+  let mic = null
+  let micTimer = 0
+  let micLevel = 0 // how hard the breath is right now, 0 to 1
+  const micSide = Math.random() < 0.5 ? -1 : 1 // which way the flame leans when it is blown on
+  let blowNow = null // what a breath does (set while the wish is open: the first one fails, the second puts it out)
+  let armIdle = () => {} // starts the nine seconds after which the flame gives up on its own
+  let wishBase = '' // what the line under "Make a wish." says when nothing else is going on
   const live = new Set()
   const track = (t) => {
     live.add(t)
@@ -102,13 +116,20 @@ export function createIntro({ smoke, sparks, sfx, hero, T, onDone }) {
     gateHint.textContent = say(n >= 2 ? copy.intro.harderStill : copy.intro.harder)
     gsap.fromTo(gateHint, { opacity: 0.15 }, { opacity: 1, duration: 0.5 })
     gsap.delayedCall(2.4, () => {
-      if (phase === 'gate') gateHint.textContent = HINT_SPIN
+      if (phase === 'gate') gateHint.textContent = baseHint
     })
   }
 
   /* ---------- flame ---------- */
-  function ignite(pt) {
+  function ignite(pt, how = {}) {
     if (phase !== 'gate') return
+    // A borrowed lighter. The first time on this phone, the first good flick does not catch (once, ever). Not after a click, a key or the
+    // kind help that comes after three weak tries, and not on "Light it again" (that button marks it as seen too).
+    if (!how.assisted && !hasBorrowed()) {
+      markBorrowed()
+      fizzleLighter(pt)
+      return false // the wheel is not lit: it waits for the next real flick
+    }
     phase = 'flame'
     gate.classList.add('is-lit') // the wheel stops listening; from here on a tap means "blow"
     if (nudgeCall) nudgeCall.kill()
@@ -137,9 +158,35 @@ export function createIntro({ smoke, sparks, sfx, hero, T, onDone }) {
       .add(rise, 1.25)
   }
 
+  // the lighter that will not catch: a big burst of sparks, one dry "chk", the flame takes for a split second and dies
+  function fizzleLighter(pt) {
+    sfx.unlock()
+    sfx.chk()
+    buzz([22, 40, 12])
+    sparks.burst(pt.x, pt.y, 64, { angle: -Math.PI / 2, spread: Math.PI * 1.15, speed: 640 })
+    sparks.puff(pt.x, pt.y - 10, 4, { spread: 16 })
+    const W = window.innerWidth
+    const H = window.innerHeight
+    u.flameX = pt.x / W
+    u.flameY = 1 - (pt.y + 8) / H
+    u.flameSize = 0.03
+    u.lean = 0
+    u.hush = 0
+    track(gsap.timeline())
+      .to(u, { flame: 1, duration: 0.05, ease: 'power2.out' }, 0)
+      .to(u, { flameSize: 0.1, duration: 0.14, ease: 'power2.out' }, 0)
+      .fromTo(u, { flash: 0.5 }, { flash: 0, duration: 0.4, ease: 'power2.out' }, 0)
+      .to(u, { flame: 0, duration: 0.12, ease: 'power3.in' }, 0.13)
+      .set(u, { flameSize: 0.03 }, 0.3)
+    baseHint = say(copy.intro.borrowed)
+    gateHint.textContent = baseHint
+    gsap.fromTo(gateHint, { opacity: 0.1 }, { opacity: 1, duration: 0.5, delay: 0.25 })
+  }
+
   function rise() {
     if (phase !== 'flame') return
     phase = 'wish'
+    wishBase = wishHint.textContent
     const d = rig.offsetWidth
 
     track(gsap.timeline())
@@ -151,13 +198,20 @@ export function createIntro({ smoke, sparks, sfx, hero, T, onDone }) {
       .add(() => T.cakeGuy && setDisclaimer(say(copy.cake.wish)), 1.0)
       .fromTo(wishLine, { opacity: 0, y: 18, filter: 'blur(10px)' }, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 1.3, ease: 'power3.out' }, 0.9)
       .fromTo(wishHint, { opacity: 0 }, { opacity: 1, duration: 0.9 }, 2)
+      .add(showMic, 2.9)
       .add(arm, 1.7)
 
-    // while the wish is open the flame leans toward wherever you are
+    // while the wish is open the flame leans toward wherever you are. if the microphone is listening it leans away from your breath,
+    // and gets smaller and shivers with how hard you blow
     smoke.onFrame = (dt) => {
       if (phase !== 'wish' || fizzling) return
-      const target = (smoke.pointer.x - 0.5) * 0.8
-      u.lean += (target - u.lean) * (1 - Math.exp(-dt * 3))
+      const blowing = micState === 'on' && micLevel > 0.02
+      const target = blowing ? micSide * Math.min(1.5, micLevel * 1.8) : (smoke.pointer.x - 0.5) * 0.8
+      u.lean += (target - u.lean) * (1 - Math.exp(-dt * (blowing ? 9 : 3)))
+      if (micState === 'on') {
+        const size = 0.26 * (1 - 0.2 * micLevel) + (Math.random() - 0.5) * 0.03 * micLevel
+        u.flameSize += (size - u.flameSize) * (1 - Math.exp(-dt * 12))
+      }
     }
   }
 
@@ -172,6 +226,12 @@ export function createIntro({ smoke, sparks, sfx, hero, T, onDone }) {
       off()
       blow(null)
     }
+    // Nobody should get stuck here: if you do nothing, the flame gives up on its own after nine seconds.
+    // (Not while the microphone is asking or listening. It has its own twenty seconds, then the nine start again.)
+    armIdle = () => {
+      if (idleBlow) idleBlow.kill()
+      idleBlow = micState === 'on' || micState === 'asking' ? null : gsap.delayedCall(9, giveUp)
+    }
     const attempt = (clientX) => {
       if (cooling) return
       if (!tricked) {
@@ -180,18 +240,20 @@ export function createIntro({ smoke, sparks, sfx, hero, T, onDone }) {
         setTimeout(() => (cooling = false), 650)
         fizzle(clientX)
         // a fresh nine seconds, so the flame cannot give up in the middle of the joke
-        if (idleBlow) idleBlow.kill()
-        idleBlow = gsap.delayedCall(9, giveUp)
+        armIdle()
+        if (micState === 'on') armMicTimer()
         return
       }
       off()
       blow(clientX)
     }
+    blowNow = attempt // the microphone calls this when it hears a breath, as if you had tapped
     const onDown = (e) => {
-      if (e.target.closest && e.target.closest('.bar, .skip')) return
+      if (e.target.closest && e.target.closest('.bar, .skip, .wish__mic')) return
       attempt(e.clientX)
     }
     const onKey = (e) => {
+      if (e.target && e.target.closest && e.target.closest('.wish__mic')) return // Enter on the mic button asks for the mic. it is not a breath
       if (e.key === 'Enter' || e.key === ' ' || e.key === 'b' || e.key === 'B') {
         e.preventDefault()
         attempt(null)
@@ -201,14 +263,87 @@ export function createIntro({ smoke, sparks, sfx, hero, T, onDone }) {
       window.removeEventListener('pointerdown', onDown)
       window.removeEventListener('keydown', onKey)
       if (idleBlow) idleBlow.kill()
+      idleBlow = null
+      blowNow = null
+      armIdle = () => {}
       disarm = null
     }
     window.addEventListener('pointerdown', onDown)
     window.addEventListener('keydown', onKey)
     disarm = off
-    // nobody should get stuck here. if you do nothing, the flame gives up on its own
-    idleBlow = gsap.delayedCall(9, giveUp)
+    armIdle()
   }
+
+  /* ---------- the microphone (only if you tap "Blow for real") ---------- */
+  // Nothing is recorded and nothing leaves the phone: the sound goes into an analyser that measures how loud it is, and that is all.
+  // Any trouble (refused, no microphone, in-app browser) and the button just goes away. tapping still works.
+  function showMic() {
+    if (phase !== 'wish' || micState !== 'idle' || !micAvailable()) return
+    micBtn.hidden = false
+    gsap.fromTo(micBtn, { opacity: 0 }, { opacity: 1, duration: 0.8 })
+  }
+
+  function armMicTimer() {
+    clearTimeout(micTimer)
+    micTimer = setTimeout(() => stopMic(true), 20000) // twenty seconds without a breath and it stops listening
+  }
+
+  // stop listening and let go of the microphone. back: show the button again, as if it had not been used
+  function stopMic(back = false) {
+    clearTimeout(micTimer)
+    micLevel = 0
+    if (mic) {
+      mic.stop()
+      mic = null
+    }
+    const was = micState
+    if (was === 'on' || was === 'asking') micState = 'idle'
+    if (!back || phase !== 'wish' || (was !== 'on' && was !== 'asking')) return
+    wishHint.textContent = wishBase
+    micBtn.removeAttribute('aria-busy')
+    micBtn.hidden = false
+    gsap.fromTo(micBtn, { opacity: 0 }, { opacity: 1, duration: 0.6 })
+    if (!fizzling) gsap.to(u, { flameSize: 0.26, duration: 0.4, ease: 'power2.out', overwrite: 'auto' })
+    armIdle()
+  }
+
+  async function startMic() {
+    if (phase !== 'wish' || micState !== 'idle' || !micAvailable()) return
+    sfx.unlock()
+    micState = 'asking'
+    micBtn.setAttribute('aria-busy', 'true') // (not disabled: a tap on a disabled button would reach the page as a breath)
+    armIdle() // while the phone is asking, the flame waits
+    let m
+    try {
+      m = await listenMic({ ctx: sfx.ctx, onLevel: (r) => (micLevel = r), onBlow: () => blowNow && blowNow(null) })
+    } catch {
+      // refused, no microphone, anything at all: no message, no second ask. tapping works as before
+      micState = 'failed'
+      micBtn.removeAttribute('aria-busy')
+      micBtn.hidden = true
+      if (phase === 'wish') armIdle()
+      return
+    }
+    if (phase !== 'wish' || micState !== 'asking') {
+      // the candle went out, or he looked away, while the phone was still asking
+      m.stop()
+      return
+    }
+    mic = m
+    micState = 'on'
+    micBtn.removeAttribute('aria-busy')
+    micBtn.hidden = true
+    wishHint.textContent = say(copy.intro.blowMic)
+    gsap.fromTo(wishHint, { opacity: 0.1 }, { opacity: 1, duration: 0.5 })
+    armIdle()
+    armMicTimer()
+  }
+
+  micBtn.addEventListener('click', startMic)
+  // a microphone left open behind a hidden tab is not something to leave running
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && (micState === 'on' || micState === 'asking')) stopMic(true)
+  })
 
   // the first breath: the flame ducks, nearly goes, and comes straight back
   function fizzle(clientX) {
@@ -218,7 +353,8 @@ export function createIntro({ smoke, sparks, sfx, hero, T, onDone }) {
     buzz(18)
     const side = clientX == null ? (Math.random() < 0.5 ? -1 : 1) : clientX < window.innerWidth / 2 ? 1 : -1
 
-    wishHint.textContent = say(copy.intro.blowAgain)
+    wishBase = say(copy.intro.blowAgain)
+    wishHint.textContent = wishBase
     gsap.fromTo(wishHint, { opacity: 0.1, y: 6 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' })
 
     track(gsap.timeline({ onComplete: () => (fizzling = false) }))
@@ -237,6 +373,8 @@ export function createIntro({ smoke, sparks, sfx, hero, T, onDone }) {
     if (phase !== 'wish') return
     phase = 'out'
     smoke.onFrame = null
+    stopMic()
+    micBtn.hidden = true
     sfx.unlock()
     sfx.blow()
 
@@ -310,7 +448,9 @@ export function createIntro({ smoke, sparks, sfx, hero, T, onDone }) {
     if (idleBlow) idleBlow.kill()
     if (disarm) disarm()
     smoke.onFrame = null
-    gsap.killTweensOf([u, rig, wish, wishLine, wishHint, gateDark, gateHint, skipBtn])
+    stopMic()
+    micBtn.hidden = true
+    gsap.killTweensOf([u, rig, wish, wishLine, wishHint, micBtn, gateDark, gateHint, skipBtn])
     Object.assign(u, { flame: 0, plume: 0, lean: 0, flash: 0 })
     phase = 'out'
     reveal(true)

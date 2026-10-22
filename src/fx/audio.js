@@ -178,6 +178,13 @@ export class Sfx {
     this._burst({ type: 'lowpass', f: 1800, q: 0.7, gain: 0.32, attack: 0.002, dur: 0.07 })
   }
 
+  /* a borrowed lighter that will not catch: one dry, flat "chk" */
+  chk() {
+    this._burst({ type: 'highpass', f: 2600, q: 0.9, gain: 0.2, attack: 0.001, dur: 0.04 })
+    this._burst({ f: 950, q: 2, gain: 0.1, attack: 0.001, dur: 0.05, delay: 0.012 })
+    this._tone({ f: 180, f2: 80, type: 'square', gain: 0.04, dur: 0.05 })
+  }
+
   /* something small and hard dropping into a bottle */
   plink() {
     this._tone({ f: 2350, f2: 1850, gain: 0.09, dur: 0.24 })

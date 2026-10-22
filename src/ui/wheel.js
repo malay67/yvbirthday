@@ -25,6 +25,9 @@ export function createWheel({ wheel, grip, rig, sparks, sfx, onIgnite, onWeak, o
   let weak = 0
   let auto = null
   let weakCall = null
+  let viaAuto = false // lit by a click, a key or the kind help after three weak tries, not by a flick
+  let armed = true // after the page says "not this time" (the borrowed lighter) it waits for the wheel to slow down before it listens again
+  let spared = false // ...and that flick was a good one, so it does not count as a weak try
 
   // where the rim meets the flame, in screen px
   function contact() {
@@ -36,8 +39,18 @@ export function createWheel({ wheel, grip, rig, sparks, sfx, onIgnite, onWeak, o
   function light() {
     if (ignited) return
     ignited = true
+    const ok = onIgnite(contact(), { assisted: viaAuto })
+    if (ok === false) {
+      // the page declined: not lit this time (the borrowed lighter). wait until the wheel has slowed right down, then listen again
+      ignited = false
+      hot = 0
+      energy = 0
+      peak = 0
+      armed = false
+      spared = true
+      return
+    }
     onVibrate()
-    onIgnite(contact())
   }
 
   function step() {
@@ -73,7 +86,9 @@ export function createWheel({ wheel, grip, rig, sparks, sfx, onIgnite, onWeak, o
 
     // lights on either: three quick frames in a row, or enough travel at speed.
     // the second rule keeps it fair on slow devices where frames are few.
-    if (!ignited) {
+    if (!ignited && !armed) {
+      if (speed < NEED * 0.5) armed = true
+    } else if (!ignited) {
       if (speed >= NEED) {
         hot++
         energy += Math.abs(delta)
@@ -87,6 +102,7 @@ export function createWheel({ wheel, grip, rig, sparks, sfx, onIgnite, onWeak, o
 
   function autoFlick() {
     if (ignited || auto) return
+    viaAuto = true
     sfx.unlock()
     gsap.killTweensOf(wheel)
     hot = 0
@@ -119,6 +135,8 @@ export function createWheel({ wheel, grip, rig, sparks, sfx, onIgnite, onWeak, o
         auto = null
       }
       dragging = true
+      armed = true // a new touch is a new try
+      spared = false
       if (weakCall) weakCall.kill()
       last = gsap.getProperty(wheel, 'rotation')
       lastT = performance.now()
@@ -136,6 +154,12 @@ export function createWheel({ wheel, grip, rig, sparks, sfx, onIgnite, onWeak, o
       if (weakCall) weakCall.kill()
       weakCall = gsap.delayedCall(0.8, () => {
         if (ignited || dragging || auto) return
+        if (spared) {
+          // it was a strong flick, the borrowed lighter just would not catch
+          spared = false
+          peak = 0
+          return
+        }
         if (peak > 25) {
           weak++
           onWeak(weak)

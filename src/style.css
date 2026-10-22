@@ -113,7 +113,15 @@ html.is-live .bar__link{opacity:1;pointer-events:auto}
 .gate__hint{margin-top:20px;color:var(--ink-2);font-size:13px}
 .wish{position:absolute;left:0;right:0;top:72%;padding:0 var(--pad);text-align:center;visibility:hidden}
 .wish__line{font-family:var(--f-serif);font-size:clamp(36px,5.4vw,82px);line-height:1;color:var(--ink)}
-.wish__hint{margin-top:18px;color:var(--ink);font-size:13px;text-shadow:0 1px 16px rgba(10,6,2,.55)}
+.wish__row{margin-top:18px;display:grid;justify-items:center;gap:16px}
+.wish__hint{color:var(--ink);font-size:13px;text-shadow:0 1px 16px rgba(10,6,2,.55)}
+/* "Blow for real (mic)": small and quiet. the invisible padding is the 48px target, and the negative margin gives it back so the layout only sees the text */
+.wish__mic{appearance:none;background:none;border:0;border-radius:0;color:var(--ink-2);font-size:12px;letter-spacing:inherit;text-decoration:underline;text-underline-offset:4px;text-decoration-color:rgba(236,226,208,.4);padding:16px 14px;margin:-16px 0;cursor:pointer;text-shadow:0 1px 16px rgba(10,6,2,.55);-webkit-tap-highlight-color:transparent}
+.wish__mic[hidden]{display:none}
+.wish__mic:hover{color:var(--ink)}
+.wish__mic:focus-visible{outline:1px solid var(--amber-hi);outline-offset:-4px}
+.wish__mic[aria-busy="true"]{opacity:.5;cursor:default}
+@media (min-width:760px){.wish__row{display:flex;justify-content:center;align-items:baseline;gap:22px}}
 
 .wheelRig{--lit:0;position:absolute;left:calc(50% - var(--d) / 2);bottom:calc(var(--d) * var(--hide) * -1);width:var(--d);height:var(--d)}
 .wheel{position:absolute;inset:0;border-radius:50%;pointer-events:none;touch-action:none;will-change:transform}
@@ -412,7 +420,7 @@ html.is-live .cig{opacity:1}
 }
 @supports (height:1svh){@media (max-width:760px){.gate{--d:min(170vw,84svh,900px)}}}
 /* a phone on its side has little height: the wish and its hint sit a bit higher, so they never touch the film line at the bottom */
-@media (max-height:520px) and (orientation:landscape){.wish{top:65%}.wish__hint{margin-top:12px}}
+@media (max-height:520px) and (orientation:landscape){.wish{top:65%}.wish__row{margin-top:12px}}
 
 /* no WebGL: the room becomes a plain warm gradient and the intro is skipped */
 html.no-gl #smoke{display:none}

@@ -1,4 +1,5 @@
 import { gsap } from 'gsap'
+import { markBorrowed } from '../lib/borrowed.js'
 
 const $ = (s, r = document) => r.querySelector(s)
 const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -14,6 +15,7 @@ export function initEnd({ colophon } = {}) {
   big.classList.toggle('is-long', [...big.children].some((w) => w.textContent.trim().length > 8))
 
   $('#againBtn').addEventListener('click', () => {
+    markBorrowed() // the lighter has been borrowed already: this time it lights first go
     const u = new URL(window.location.href)
     u.searchParams.delete('skip') // light it again means the whole thing, from the dark
     u.hash = ''

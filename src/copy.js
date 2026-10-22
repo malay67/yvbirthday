@@ -67,6 +67,9 @@ export const copy = {
     blowTap: `tap anywhere to blow it out`,
     blowClick: `click anywhere to blow it out`,
     blowAgain: `Harder.`, // the first blow never works. that's the joke.
+    borrowed: `Borrowed lighter. Again.`, // the very first flick on a phone never catches. once, ever
+    mic: `Blow for real (mic)`, // a small button under the blow line, only if the browser can listen
+    blowMic: `Blow at the screen.`, // while the microphone is listening
     skip: `Skip intro`,
   },
 

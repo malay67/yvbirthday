@@ -39,7 +39,11 @@
 
     <div class="wish" id="wish">
       <p class="wish__line" id="wishLine" data-copy="intro.wish"></p>
-      <p class="wish__hint mono" id="wishHint"></p>
+      <div class="wish__row">
+        <p class="wish__hint mono" id="wishHint"></p>
+        <!-- only shown if the browser can listen. tapping it asks for the microphone; it is not a blow -->
+        <button class="wish__mic mono" id="wishMic" type="button" hidden data-copy="intro.mic"></button>
+      </div>
     </div>
 
     <div class="wheelRig" id="wheelRig">
